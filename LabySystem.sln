@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabySystem", "LabySystem\LabySystem.csproj", "{F31C4BBB-9373-4F4D-BFF3-1010FCA5A11C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabyTest", "LabySystem\LabyTest\LabyTest.csproj", "{5F4A8084-642B-4528-8F6D-9041BCAC9D11}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F31C4BBB-9373-4F4D-BFF3-1010FCA5A11C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F31C4BBB-9373-4F4D-BFF3-1010FCA5A11C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F31C4BBB-9373-4F4D-BFF3-1010FCA5A11C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F4A8084-642B-4528-8F6D-9041BCAC9D11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F4A8084-642B-4528-8F6D-9041BCAC9D11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F4A8084-642B-4528-8F6D-9041BCAC9D11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F4A8084-642B-4528-8F6D-9041BCAC9D11}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
