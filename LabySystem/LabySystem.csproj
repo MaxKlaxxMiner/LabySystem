@@ -39,8 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Knot32.cs" />
     <Compile Include="Core\Knot64.cs" />
     <Compile Include="ILaby.cs" />
+    <Compile Include="LabySimpleFast.cs" />
     <Compile Include="LabySimple.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
