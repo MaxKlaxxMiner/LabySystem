@@ -202,7 +202,7 @@ namespace LabySystem
     /// <returns>true, wenn das Spielfeld eine Wand/blockiert ist</returns>
     public bool GetWall(int x, int y)
     {
-      if (x < 0 || y < 0 || x >= pixelWidth || y >= pixelHeight) throw new ArgumentOutOfRangeException();
+      if (x < 0 || y < 0 || x > pixelWidth || y > pixelHeight) throw new ArgumentOutOfRangeException();
 
       if ((x & 1) + (y & 1) == 0) return true;
       if ((x & 1) + (y & 1) == 2) return false;

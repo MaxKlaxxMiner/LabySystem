@@ -11,13 +11,16 @@ using LabySystem;
 
 namespace LabyConsole
 {
-  class Program
+  static class Program
   {
-    static void Main(string[] args)
+    static void Main()
     {
       int level = 0;
-      int gameWidthMax = 159;
-      int gameHeightMax = 49;
+      int levelMax = 10;
+      int gameWidthMax = (Console.WindowWidth - 1) * 2 / 2 - 1;
+      int gameHeightMax = (Console.WindowHeight - 1) * 2 / 2 - 1;
+
+      Console.Title = "Laby " + gameWidthMax + " x " + gameHeightMax;
 
       var charRoom = ' ';
       var colorRoom = ConsoleColor.DarkGray;
@@ -34,52 +37,86 @@ namespace LabyConsole
       var charFinish = '\x3';
       var colorFinish = ConsoleColor.Red;
 
-      while (level <= 20)
-      {
-        int gameWidth = (gameWidthMax * level / 20) / 2 * 2 + 1;
-        int gameHeight = (gameHeightMax * level / 20) / 2 * 2 + 1;
+      var charWalked2 = '\x2591';
+      var colorWalked2 = ConsoleColor.Yellow;
 
-        ILaby demo = new LabySimpleFast(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
+      while (level <= levelMax)
+      {
+        int gameWidth = (gameWidthMax * level / levelMax) / 2 * 2 + 1;
+        int gameHeight = (gameHeightMax * level / levelMax) / 2 * 2 + 1;
 
         Console.ForegroundColor = colorMan;
         Console.BackgroundColor = colorRoom;
         Console.Write("generate...");
 
-        while (demo.Generate(10000) > 0) ;
+        ILaby laby = new LabySimpleFast(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
+        LabyGame game = new LabyGame(laby);
+
+        while (laby.Generate(10000) > 0) { }
 
         StringBuilder output = new StringBuilder();
-        for (int y = 0; y < demo.Height; y++)
+        for (int y = 0; y < laby.Height; y++)
         {
-          for (int x = 0; x < demo.Width; x++) output.Append(demo.GetWall(x, y) ? charWall : charRoom);
+          for (int x = 0; x < laby.Width; x++) output.Append(laby.GetWall(x, y) ? charWall : charRoom);
           output.AppendLine();
         }
 
         Console.Clear();
         Console.ForegroundColor = colorWall;
-
         Console.Write(output.ToString());
 
-        int px = 1;
-        int py = 1;
+        game.SetFieldChangeEvent((l, t, x, y) =>
+        {
+          Console.SetCursorPosition(x, y);
+          switch (t)
+          {
+            case LabyGame.FieldType.wall:
+            {
+              Console.ForegroundColor = colorWall;
+              Console.Write(charWall);
+            } break;
+            case LabyGame.FieldType.roomVisitedNone:
+            {
+              Console.ForegroundColor = colorWall;
+              Console.Write(charRoom);
+            } break;
+            case LabyGame.FieldType.roomVisitedFirst:
+            {
+              Console.ForegroundColor = colorWalked;
+              Console.Write(charWalked);
+            } break;
+            case LabyGame.FieldType.roomVisitedSecond:
+            {
+              Console.ForegroundColor = colorWalked2;
+              Console.Write(charWalked2);
+            } break;
+            case LabyGame.FieldType.player:
+            case LabyGame.FieldType.player | LabyGame.FieldType.roomVisitedFirst:
+            case LabyGame.FieldType.player | LabyGame.FieldType.roomVisitedSecond:
+            {
+              Console.ForegroundColor = colorMan;
+              Console.Write(charMen);
+            } break;
+            case LabyGame.FieldType.finish:
+            case LabyGame.FieldType.finish | LabyGame.FieldType.roomVisitedFirst:
+            case LabyGame.FieldType.finish | LabyGame.FieldType.roomVisitedSecond:
+            {
+              Console.ForegroundColor = colorFinish;
+              Console.Write(charFinish);
+            } break;
+          }
+        });
 
-        int fx = demo.Width - 2;
-        int fy = demo.Height - 2;
+        game.Update(game.PlayerX, game.PlayerY);
+        game.Update(game.FinishX, game.FinishY);
 
         bool finishMode = false;
 
         for (; ; )
         {
-          Console.SetCursorPosition(fx, fy);
-          Console.ForegroundColor = colorFinish;
-          Console.Write(charFinish);
+          if (finishMode) Console.SetCursorPosition(game.FinishX, game.FinishY); else Console.SetCursorPosition(game.PlayerX, game.PlayerY);
 
-          Console.SetCursorPosition(px, py);
-          Console.ForegroundColor = colorMan;
-          Console.Write(charMen);
-
-          if (finishMode) Console.SetCursorPosition(fx, fy); else Console.SetCursorPosition(px, py);
-
-          var key = Console.ReadKey().Key;
+          var key = Console.ReadKey(true).Key;
 
           if (key == ConsoleKey.Escape)
           {
@@ -92,62 +129,26 @@ namespace LabyConsole
             finishMode = !finishMode;
           }
 
-          if (finishMode)
+          switch (key)
           {
-            Console.SetCursorPosition(fx, fy);
-            Console.ForegroundColor = colorWalked;
-            Console.Write(charWalked);
+            case ConsoleKey.LeftArrow:
+            case ConsoleKey.A:
+            case ConsoleKey.NumPad4: game.MoveLeft(!finishMode); break;
 
-            if ((key == ConsoleKey.LeftArrow || key == ConsoleKey.A || key == ConsoleKey.NumPad4) && !demo.GetWall(fx - 1, fy))
-            {
-              Console.SetCursorPosition(fx - 1, fy); Console.Write(charWalked);
-              fx -= 2;
-            }
-            if ((key == ConsoleKey.RightArrow || key == ConsoleKey.D || key == ConsoleKey.NumPad6) && !demo.GetWall(fx + 1, fy))
-            {
-              Console.SetCursorPosition(fx + 1, fy); Console.Write(charWalked);
-              fx += 2;
-            }
-            if ((key == ConsoleKey.UpArrow || key == ConsoleKey.W || key == ConsoleKey.NumPad8) && !demo.GetWall(fx, fy - 1))
-            {
-              Console.SetCursorPosition(fx, fy - 1); Console.Write(charWalked);
-              fy -= 2;
-            }
-            if ((key == ConsoleKey.DownArrow || key == ConsoleKey.S || key == ConsoleKey.NumPad2) && !demo.GetWall(fx, fy + 1))
-            {
-              Console.SetCursorPosition(fx, fy + 1); Console.Write(charWalked);
-              fy += 2;
-            }
-          }
-          else
-          {
-            Console.SetCursorPosition(px, py);
-            Console.ForegroundColor = colorWalked;
-            Console.Write(charWalked);
+            case ConsoleKey.RightArrow:
+            case ConsoleKey.D:
+            case ConsoleKey.NumPad6: game.MoveRight(!finishMode); break;
 
-            if ((key == ConsoleKey.LeftArrow || key == ConsoleKey.A || key == ConsoleKey.NumPad4) && !demo.GetWall(px - 1, py))
-            {
-              Console.SetCursorPosition(px - 1, py); Console.Write(charWalked);
-              px -= 2;
-            }
-            if ((key == ConsoleKey.RightArrow || key == ConsoleKey.D || key == ConsoleKey.NumPad6) && !demo.GetWall(px + 1, py))
-            {
-              Console.SetCursorPosition(px + 1, py); Console.Write(charWalked);
-              px += 2;
-            }
-            if ((key == ConsoleKey.UpArrow || key == ConsoleKey.W || key == ConsoleKey.NumPad8) && !demo.GetWall(px, py - 1))
-            {
-              Console.SetCursorPosition(px, py - 1); Console.Write(charWalked);
-              py -= 2;
-            }
-            if ((key == ConsoleKey.DownArrow || key == ConsoleKey.S || key == ConsoleKey.NumPad2) && !demo.GetWall(px, py + 1))
-            {
-              Console.SetCursorPosition(px, py + 1); Console.Write(charWalked);
-              py += 2;
-            }
+            case ConsoleKey.UpArrow:
+            case ConsoleKey.W:
+            case ConsoleKey.NumPad8: game.MoveUp(!finishMode); break;
+
+            case ConsoleKey.DownArrow:
+            case ConsoleKey.S:
+            case ConsoleKey.NumPad2: game.MoveDown(!finishMode); break;
           }
 
-          if (px == fx && py == fy)
+          if (game.FinishReached)
           {
             level++;
             break;
