@@ -105,8 +105,9 @@ namespace LabySystem
       }
     }
 
+    #region # // --- FieldNumberFill() ---
     /// <summary>
-    /// füllt mit einer bestimmten Wandnummer einer zusammenhängenden Wand aus
+    /// füllt die Wandnummer einer zusammenhängenden Wand
     /// </summary>
     /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
     /// <param name="wallNumber">die zu befüllende Wandnummer</param>
@@ -115,12 +116,65 @@ namespace LabySystem
       if (field[pos].WallNumber != wallNumber)
       {
         field[pos].WallNumber = wallNumber;
-        if (field[pos].WallLeft) FieldNumberFill(pos - 1, wallNumber);
-        if (field[pos + 1].WallLeft) FieldNumberFill(pos + 1, wallNumber);
-        if (field[pos].WallTop) FieldNumberFill(pos - fieldWidth, wallNumber);
-        if (field[pos + fieldWidth].WallTop) FieldNumberFill(pos + fieldWidth, wallNumber);
+        if (field[pos].WallLeft && field[pos - 1].WallNumber != wallNumber) FillLeft(pos - 1, wallNumber);
+        if (field[pos + 1].WallLeft && field[pos + 1].WallNumber != wallNumber) FillRight(pos + 1, wallNumber);
+        if (field[pos].WallTop && field[pos - fieldWidth].WallNumber != wallNumber) FillTop(pos - fieldWidth, wallNumber);
+        if (field[pos + fieldWidth].WallTop && field[pos + fieldWidth].WallNumber != wallNumber) FillBottom(pos + fieldWidth, wallNumber);
       }
     }
+
+    /// <summary>
+    /// Füllmodus links gerichtet
+    /// </summary>
+    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
+    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
+    void FillLeft(int pos, int wallNumber)
+    {
+      field[pos].WallNumber = wallNumber;
+      if (field[pos].WallLeft) FillLeft(pos - 1, wallNumber);
+      if (field[pos].WallTop) FillTop(pos - fieldWidth, wallNumber);
+      if (field[pos + fieldWidth].WallTop) FillBottom(pos + fieldWidth, wallNumber);
+    }
+
+    /// <summary>
+    /// Füllmodus rechts gerichtet
+    /// </summary>
+    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
+    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
+    void FillRight(int pos, int wallNumber)
+    {
+      field[pos].WallNumber = wallNumber;
+      if (field[pos + 1].WallLeft) FillRight(pos + 1, wallNumber);
+      if (field[pos].WallTop) FillTop(pos - fieldWidth, wallNumber);
+      if (field[pos + fieldWidth].WallTop) FillBottom(pos + fieldWidth, wallNumber);
+    }
+
+    /// <summary>
+    /// Füllmodus oben gerichtet
+    /// </summary>
+    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
+    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
+    void FillTop(int pos, int wallNumber)
+    {
+      field[pos].WallNumber = wallNumber;
+      if (field[pos].WallLeft) FillLeft(pos - 1, wallNumber);
+      if (field[pos + 1].WallLeft) FillRight(pos + 1, wallNumber);
+      if (field[pos].WallTop) FillTop(pos - fieldWidth, wallNumber);
+    }
+
+    /// <summary>
+    /// Füllmodus unten gerichtet
+    /// </summary>
+    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
+    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
+    void FillBottom(int pos, int wallNumber)
+    {
+      field[pos].WallNumber = wallNumber;
+      if (field[pos].WallLeft) FillLeft(pos - 1, wallNumber);
+      if (field[pos + 1].WallLeft) FillRight(pos + 1, wallNumber);
+      if (field[pos + fieldWidth].WallTop) FillBottom(pos + fieldWidth, wallNumber);
+    }
+    #endregion
     #endregion
 
     #region # // --- ILaby ---
@@ -151,23 +205,27 @@ namespace LabySystem
         if (next < 0) // --- waagerechte Variante (WallLeft) ---
         {
           next = -next;
-          if (field[next].WallLeft || field[next].WallNumber == field[next - 1].WallNumber) continue; // überspringen, da Wand nicht gesetzt werden kann
 
-          field[next].WallLeft = true;
-          int number = Math.Min(field[next].WallNumber, field[next - 1].WallNumber);
-          FieldNumberFill(next, number);
-          FieldNumberFill(next - 1, number);
+          int n1 = field[next].WallNumber;
+          int n2 = field[next - 1].WallNumber;
+
+          if (n1 == n2 || field[next].WallLeft) continue; // überspringen, da Wand nicht gesetzt werden kann
+
+          field[next].WallLeft = true; // Wand setzen
+
+          if (n1 < n2) FieldNumberFill(next - 1, n1); else FieldNumberFill(next, n2); // angrenzende Wand auffüllen
         }
         else // --- senkrechte Variante (WallTop) ---
         {
-          if (field[next].WallTop || field[next].WallNumber == field[next - fieldWidth].WallNumber) continue; // überspringen, da Wand nicht gesetzt werdem kann
+          int n1 = field[next].WallNumber;
+          int n2 = field[next - fieldWidth].WallNumber;
 
-          field[next].WallTop = true;
-          int number = Math.Min(field[next].WallNumber, field[next - fieldWidth].WallNumber);
-          FieldNumberFill(next, number);
-          FieldNumberFill(next - fieldWidth, number);
+          if (n1 == n2 || field[next].WallTop) continue; // überspringen, da Wand nicht gesetzt werden kann
+
+          field[next].WallTop = true; // Wand setzen
+
+          if (n1 < n2) FieldNumberFill(next - fieldWidth, n1); else FieldNumberFill(next, n2); // angrenzende Wand auffüllen
         }
-
       }
 
       return remainList.Length;
