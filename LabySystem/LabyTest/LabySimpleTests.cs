@@ -49,6 +49,7 @@ namespace LabyTest
         {
           Assert.AreEqual(set.pw, laby.Width);
           Assert.AreEqual(set.ph, laby.Height);
+          while (laby.Generate(1000000) > 0) ;
         }
       }
     }
