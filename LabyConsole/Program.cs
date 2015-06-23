@@ -30,7 +30,7 @@ namespace LabyConsole
         int gameWidth = (gameWidthMax * level / 20) / 2 * 2 + 1;
         int gameHeight = (gameHeightMax * level / 20) / 2 * 2 + 1;
 
-        ILaby demo = new LabySimple(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
+        ILaby demo = new LabySimpleFast(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write("generate...");
