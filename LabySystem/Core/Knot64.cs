@@ -1,10 +1,6 @@
 ﻿#region # using *.*
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #endregion
 
@@ -28,9 +24,9 @@ namespace LabySystem.Core
     /// <param name="wallLeft">gibt an, ob die rechte Wand gesetzt werden soll</param>
     public Knot64(long wallNumber, bool wallTop, bool wallLeft)
     {
-      this.val = (ulong)(wallNumber << 2) |
-                 (wallTop ? (ulong)1 : (ulong)0) |
-                 (wallLeft ? (ulong)2 : (ulong)0);
+      val = (ulong)(wallNumber << 2) |
+            (ulong)(wallTop ? 1 : 0) |
+            (ulong)(wallLeft ? 2 : 0);
     }
 
     /// <summary>
@@ -59,7 +55,7 @@ namespace LabySystem.Core
       }
       set
       {
-        val = (val & 0xfffffffffffffffe) | (value ? (ulong)1 : (ulong)0);
+        val = (val & 0xfffffffffffffffe) | (ulong)(value ? 1 : 0);
       }
     }
 
@@ -74,7 +70,7 @@ namespace LabySystem.Core
       }
       set
       {
-        val = (val & 0xfffffffffffffffd) | (value ? (ulong)2 : (ulong)0);
+        val = (val & 0xfffffffffffffffd) | (ulong)(value ? 2 : 0);
       }
     }
 

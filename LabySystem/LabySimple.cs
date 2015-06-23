@@ -3,8 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LabySystem.Core;
 
 #endregion
@@ -69,13 +67,13 @@ namespace LabySystem
     {
       fieldWidth = Math.Max(2, (pixelWidth - 1) / 2) + 1;
       fieldHeight = Math.Max(2, (pixelHeight - 1) / 2) + 1;
-      this.field = Knot64.CreateBaseKnotes(fieldWidth, fieldHeight).ToArray();
+      field = Knot64.CreateBaseKnotes(fieldWidth, fieldHeight).ToArray();
       this.pixelWidth = fieldWidth * 2 - 1;
       this.pixelHeight = fieldHeight * 2 - 1;
-      this.rnd = new Random(seed);
+      rnd = new Random(seed);
 
-      this.remainList = GetRemainList().ToArray();
-      this.remainTicks = this.remainList.Length;
+      remainList = GetRemainList().ToArray();
+      remainTicks = remainList.Length;
     }
 
     /// <summary>
