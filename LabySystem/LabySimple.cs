@@ -16,6 +16,38 @@ namespace LabySystem
   /// </summary>
   public class LabySimple : ILaby
   {
+    #region # // --- Variablen ---
+    /// <summary>
+    /// merkt sich das gesamte Spielfeld
+    /// </summary>
+    Knot64[] field;
+
+    /// <summary>
+    /// merkt sich die Breite des Spielfeldes in Knoten
+    /// </summary>
+    int fieldWidth;
+
+    /// <summary>
+    /// merkt sich die Höhe des Spielfeldes in Knoten
+    /// </summary>
+    int fieldHeight;
+
+    /// <summary>
+    /// merkt sich die Breite des Spielfeldes in Pixeln
+    /// </summary>
+    int pixelWidth;
+
+    /// <summary>
+    /// merkt sich die Höhe des Spielfeldes in Pixeln
+    /// </summary>
+    int pixelHeight;
+
+    /// <summary>
+    /// merkt sich den aktuellen Zufallsgenerator
+    /// </summary>
+    Random rnd;
+    #endregion
+
     #region # // --- ILaby ---
     /// <summary>
     /// generiert ein Teil des Labyrinthes
@@ -34,7 +66,7 @@ namespace LabySystem
     {
       get
       {
-        throw new NotImplementedException(); 
+        return pixelWidth;
       }
     }
 
@@ -45,7 +77,7 @@ namespace LabySystem
     {
       get
       {
-        throw new NotImplementedException(); 
+        return pixelHeight;
       }
     }
 
