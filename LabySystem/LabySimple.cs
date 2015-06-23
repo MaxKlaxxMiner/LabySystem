@@ -84,6 +84,7 @@ namespace LabySystem
     public void Dispose()
     {
       field = null;
+      remainList = null;
     }
     #endregion
 
