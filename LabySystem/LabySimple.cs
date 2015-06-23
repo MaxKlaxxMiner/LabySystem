@@ -48,6 +48,16 @@ namespace LabySystem
     Random rnd;
     #endregion
 
+    #region # // --- Dispose ---
+    /// <summary>
+    /// gibt alle Ressourcen wieder frei
+    /// </summary>
+    public void Dispose()
+    {
+      field = null;
+    }
+    #endregion
+
     #region # // --- ILaby ---
     /// <summary>
     /// generiert ein Teil des Labyrinthes

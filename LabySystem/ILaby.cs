@@ -13,7 +13,7 @@ namespace LabySystem
   /// <summary>
   /// Schnittstelle eines Labyrinth-Systems
   /// </summary>
-  public interface ILaby
+  public interface ILaby : IDisposable
   {
     /// <summary>
     /// generiert ein Teil des Labyrinthes
