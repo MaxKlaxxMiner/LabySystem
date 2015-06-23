@@ -48,7 +48,23 @@ namespace LabySystem
     Random rnd;
     #endregion
 
-    #region # // --- Dispose ---
+    #region # // --- Konstruktor / Dispose ---
+    /// <summary>
+    /// Konstruktor
+    /// </summary>
+    /// <param name="pixelWidth">Breite des Spielfeldes in Pixeln (min: 5)</param>
+    /// <param name="pixelHeight">Höhe des Spielfeldes in Pixeln (min: 5)</param>
+    /// <param name="seed">Random-Startwert</param>
+    public LabySimple(int pixelWidth, int pixelHeight, int seed)
+    {
+      fieldWidth = Math.Max(2, (pixelWidth - 1) / 2) + 1;
+      fieldHeight = Math.Max(2, (pixelHeight - 1) / 2) + 1;
+      this.field = new Knot64[fieldWidth * fieldHeight];
+      this.pixelWidth = fieldWidth * 2 - 1;
+      this.pixelHeight = fieldHeight * 2 - 1;
+      this.rnd = new Random(seed);
+    }
+
     /// <summary>
     /// gibt alle Ressourcen wieder frei
     /// </summary>
