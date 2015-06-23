@@ -46,6 +46,16 @@ namespace LabySystem
     /// merkt sich den aktuellen Zufallsgenerator
     /// </summary>
     Random rnd;
+
+    /// <summary>
+    /// merkt sich ein Array mit den noch offenen Feldern (als Cache, muss daher nicht aktuell sein)
+    /// </summary>
+    int[] remainList;
+
+    /// <summary>
+    /// merkt sich die Anzahl der noch offenen Ticks
+    /// </summary>
+    int remainTicks;
     #endregion
 
     #region # // --- Konstruktor / Dispose ---
@@ -63,6 +73,9 @@ namespace LabySystem
       this.pixelWidth = fieldWidth * 2 - 1;
       this.pixelHeight = fieldHeight * 2 - 1;
       this.rnd = new Random(seed);
+
+      this.remainList = GetRemainList().ToArray();
+      this.remainTicks = this.remainList.Length;
     }
 
     /// <summary>
@@ -71,6 +84,25 @@ namespace LabySystem
     public void Dispose()
     {
       field = null;
+    }
+    #endregion
+
+    #region # // --- private Methoden ---
+    /// <summary>
+    /// gibt eine Liste mit den allen noch offenen Möglichkeiten zurück
+    /// </summary>
+    IEnumerable<int> GetRemainList()
+    {
+      for (int y = 1; y < fieldHeight; y++)
+      {
+        for (int x = 1; x < fieldWidth; x++)
+        {
+          int p = x + y * fieldWidth;
+          Knot64 k = field[p];
+          if (!k.WallTop && field[p - fieldWidth].WallNumber != k.WallNumber) yield return p;
+          if (!k.WallLeft && field[p - 1].WallNumber != k.WallNumber) yield return -p;
+        }
+      }
     }
     #endregion
 
