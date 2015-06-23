@@ -10,7 +10,7 @@ using LabySystem.Core;
 namespace LabyTest
 {
   [TestClass]
-  public class LabyCore
+  public class LabyCoreTests
   {
     /// <summary>
     /// Core.Knot64 testen
