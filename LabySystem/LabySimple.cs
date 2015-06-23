@@ -104,6 +104,23 @@ namespace LabySystem
         }
       }
     }
+
+    /// <summary>
+    /// füllt mit einer bestimmten Wandnummer einer zusammenhängenden Wand aus
+    /// </summary>
+    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
+    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
+    void FieldNumberFill(int pos, long wallNumber)
+    {
+      if (field[pos].WallNumber != wallNumber)
+      {
+        field[pos].WallNumber = wallNumber;
+        if (field[pos].WallLeft) FieldNumberFill(pos - 1, wallNumber);
+        if (field[pos + 1].WallLeft) FieldNumberFill(pos + 1, wallNumber);
+        if (field[pos].WallTop) FieldNumberFill(pos - fieldWidth, wallNumber);
+        if (field[pos + fieldWidth].WallTop) FieldNumberFill(pos + fieldWidth, wallNumber);
+      }
+    }
     #endregion
 
     #region # // --- ILaby ---
@@ -114,7 +131,46 @@ namespace LabySystem
     /// <returns>Anzahl der noch abzuarbeitenden Rechenschritte (0 = fertig)</returns>
     public long Generate(int ticks)
     {
-      throw new NotImplementedException();
+      if (remainList.Length == 0) return 0;
+      int remainLimit = (remainList.Length + 1) / 2;
+
+      for (int tick = 0; tick < ticks; tick++)
+      {
+        remainTicks--;
+
+        if (remainTicks < remainLimit)
+        {
+          remainList = GetRemainList().ToArray();
+          remainTicks = remainList.Length;
+          if (remainTicks == 0) break;
+          remainLimit = (remainList.Length + 1) / 2;
+        }
+
+        int next = remainList[rnd.Next(remainList.Length)];
+
+        if (next < 0) // --- waagerechte Variante (WallLeft) ---
+        {
+          next = -next;
+          if (field[next].WallLeft || field[next].WallNumber == field[next - 1].WallNumber) continue; // überspringen, da Wand nicht gesetzt werden kann
+
+          field[next].WallLeft = true;
+          long number = Math.Min(field[next].WallNumber, field[next - 1].WallNumber);
+          FieldNumberFill(next, number);
+          FieldNumberFill(next - 1, number);
+        }
+        else // --- senkrechte Variante (WallTop) ---
+        {
+          if (field[next].WallTop || field[next].WallNumber == field[next - fieldWidth].WallNumber) continue; // überspringen, da Wand nicht gesetzt werdem kann
+
+          field[next].WallTop = true;
+          long number = Math.Min(field[next].WallNumber, field[next - fieldWidth].WallNumber);
+          FieldNumberFill(next, number);
+          FieldNumberFill(next - fieldWidth, number);
+        }
+
+      }
+
+      return remainList.Length;
     }
 
     /// <summary>
