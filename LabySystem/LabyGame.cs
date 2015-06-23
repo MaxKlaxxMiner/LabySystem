@@ -115,14 +115,14 @@ namespace LabySystem
     /// <param name="width">Breite des Labyrinthes in Pixeln</param>
     /// <param name="height">Höhe des Labyrinthes in Pixeln</param>
     /// <param name="seed">Startwert für den Zufallsgenerator</param>
-    public LabyGame(int width, int height, int seed) : this(new LabySimple(width, height, seed)) { }
+    public LabyGame(int width, int height, int seed) : this(new LabySimpleFast(width, height, seed)) { }
 
     /// <summary>
     /// Konstruktor
     /// </summary>
     /// <param name="width">Breite des Labyrinthes in Pixeln</param>
     /// <param name="height">Höhe des Labyrinthes in Pixeln</param>
-    public LabyGame(int width, int height) : this(new LabySimple(width, height, Environment.TickCount)) { }
+    public LabyGame(int width, int height) : this(new LabySimpleFast(width, height, Environment.TickCount)) { }
     #endregion
 
     #region # // --- public Methoden ---

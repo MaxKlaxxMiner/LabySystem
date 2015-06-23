@@ -70,6 +70,7 @@ namespace LabyTest
       }
     }
 
+#if DEBUG
     /// <summary>
     /// LabySimple testen
     /// </summary>
@@ -87,6 +88,7 @@ namespace LabyTest
         }
       }
     }
+#endif
 
     /// <summary>
     /// LabySimpleFast testen

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace LabySystem.Core
 {
+#if DEBUG
   /// <summary>
   /// Struktur, welche sich einen (64-Bit) Knoten merkt
   /// </summary>
@@ -105,4 +106,5 @@ namespace LabySystem.Core
       }
     }
   }
+#endif
 }

@@ -9,6 +9,7 @@ using LabySystem.Core;
 
 namespace LabySystem
 {
+#if DEBUG
   /// <summary>
   /// Klasse zum erstellen und benutzen eines Labyrintes
   /// </summary>
@@ -213,4 +214,5 @@ namespace LabySystem
     }
     #endregion
   }
+#endif
 }
