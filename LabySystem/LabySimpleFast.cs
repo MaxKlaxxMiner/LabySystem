@@ -45,7 +45,7 @@ namespace LabySystem
     /// <summary>
     /// merkt sich den aktuellen Zufallsgenerator
     /// </summary>
-    Random rnd;
+    ulong rnd;
 
     /// <summary>
     /// merkt sich ein Array mit den noch offenen Feldern (als Cache, muss daher nicht aktuell sein)
@@ -72,7 +72,7 @@ namespace LabySystem
       this.field = Knot32.CreateBaseKnotes(fieldWidth, fieldHeight).ToArray();
       this.pixelWidth = fieldWidth * 2 - 1;
       this.pixelHeight = fieldHeight * 2 - 1;
-      this.rnd = new Random(seed);
+      this.rnd = (ulong)new Random(seed).Next();
 
       this.remainList = GetRemainList().ToArray();
       this.remainTicks = this.remainList.Length;
@@ -186,8 +186,9 @@ namespace LabySystem
     public long Generate(int ticks)
     {
       if (remainList.Length == 0) return 0;
-      int remainLimit = (remainList.Length + 1) / 2;
+      int remainLimit = (remainList.Length + 1) / 4;
 
+      var _rnd = rnd;
       for (int tick = 0; tick < ticks; tick++)
       {
         remainTicks--;
@@ -197,10 +198,10 @@ namespace LabySystem
           remainList = GetRemainList().ToArray();
           remainTicks = remainList.Length;
           if (remainTicks == 0) break;
-          remainLimit = (remainList.Length + 1) / 2;
+          remainLimit = (remainList.Length + 1) / 4;
         }
 
-        int next = remainList[rnd.Next(remainList.Length)];
+        int next = remainList[((_rnd = _rnd * 214013L + 2531011L) >> 16) % (uint)remainList.Length];
 
         if (next < 0) // --- waagerechte Variante (WallLeft) ---
         {
@@ -227,6 +228,8 @@ namespace LabySystem
           if (n1 < n2) FieldNumberFill(next - fieldWidth, n1); else FieldNumberFill(next, n2); // angrenzende Wand auffüllen
         }
       }
+
+      rnd = _rnd;
 
       return remainList.Length;
     }
