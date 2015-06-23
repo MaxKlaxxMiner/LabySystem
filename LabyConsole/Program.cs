@@ -30,23 +30,24 @@ namespace LabyConsole
         int gameWidth = (gameWidthMax * level / 20) / 2 * 2 + 1;
         int gameHeight = (gameHeightMax * level / 20) / 2 * 2 + 1;
 
-        ILaby demo = new LabySimple(gameWidth, gameHeight, 11111 * gameWidth * gameHeight);
+        ILaby demo = new LabySimple(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.Write("generate...");
 
         while (demo.Generate(100) > 0) ;
 
-        Console.Clear();
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        StringBuilder output = new StringBuilder();
         for (int y = 0; y < demo.Height; y++)
         {
-          for (int x = 0; x < demo.Width; x++)
-          {
-            Console.Write(demo.GetWall(x, y) ? charWall : charRoom);
-          }
-          Console.WriteLine();
+          for (int x = 0; x < demo.Width; x++) output.Append(demo.GetWall(x, y) ? charWall : charRoom);
+          output.AppendLine();
         }
+
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+
+        Console.Write(output.ToString());
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.SetCursorPosition(1, 1);
