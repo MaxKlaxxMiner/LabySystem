@@ -19,11 +19,20 @@ namespace LabyConsole
       int gameWidthMax = 159;
       int gameHeightMax = 49;
 
-      char charWall = '\x2588';
-      char charRoom = ' ';
-      char charMen = '\x4';
-      char charFinish = '\x3';
-      char charWalked = '\x2591';
+      var charRoom = ' ';
+      var colorRoom = ConsoleColor.DarkGray;
+
+      var charWall = '\x2588';
+      var colorWall = ConsoleColor.Black;
+
+      var charMen = '\x4';
+      var colorMan = ConsoleColor.Green;
+
+      var charWalked = '\x2591';
+      var colorWalked = ConsoleColor.Gray;
+
+      var charFinish = '\x3';
+      var colorFinish = ConsoleColor.Red;
 
       while (level <= 20)
       {
@@ -32,10 +41,11 @@ namespace LabyConsole
 
         ILaby demo = new LabySimpleFast(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
 
-        Console.ForegroundColor = ConsoleColor.White;
+        Console.ForegroundColor = colorMan;
+        Console.BackgroundColor = colorRoom;
         Console.Write("generate...");
 
-        while (demo.Generate(100) > 0) ;
+        while (demo.Generate(10000) > 0) ;
 
         StringBuilder output = new StringBuilder();
         for (int y = 0; y < demo.Height; y++)
@@ -45,56 +55,99 @@ namespace LabyConsole
         }
 
         Console.Clear();
-        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.ForegroundColor = colorWall;
 
         Console.Write(output.ToString());
 
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.SetCursorPosition(1, 1);
-        Console.Write(charFinish);
+        int px = 1;
+        int py = 1;
 
-        int px = demo.Width - 2;
-        int py = demo.Height - 2;
+        int fx = demo.Width - 2;
+        int fy = demo.Height - 2;
+
+        bool finishMode = false;
 
         for (; ; )
         {
-          Console.ForegroundColor = ConsoleColor.Yellow;
+          Console.SetCursorPosition(fx, fy);
+          Console.ForegroundColor = colorFinish;
+          Console.Write(charFinish);
+
           Console.SetCursorPosition(px, py);
+          Console.ForegroundColor = colorMan;
           Console.Write(charMen);
-          Console.SetCursorPosition(px, py);
+
+          if (finishMode) Console.SetCursorPosition(fx, fy); else Console.SetCursorPosition(px, py);
 
           var key = Console.ReadKey().Key;
+
           if (key == ConsoleKey.Escape)
           {
             level = int.MaxValue;
             break;
           }
 
-          Console.ForegroundColor = ConsoleColor.DarkGray;
-          Console.SetCursorPosition(px, py); Console.Write(charWalked);
-
-          if ((key == ConsoleKey.LeftArrow || key == ConsoleKey.A || key == ConsoleKey.NumPad4) && !demo.GetWall(px - 1, py))
+          if (key == ConsoleKey.Spacebar)
           {
-            Console.SetCursorPosition(px - 1, py); Console.Write(charWalked);
-            px -= 2;
-          }
-          if ((key == ConsoleKey.RightArrow || key == ConsoleKey.D || key == ConsoleKey.NumPad6) && !demo.GetWall(px + 1, py))
-          {
-            Console.SetCursorPosition(px + 1, py); Console.Write(charWalked);
-            px += 2;
-          }
-          if ((key == ConsoleKey.UpArrow || key == ConsoleKey.W || key == ConsoleKey.NumPad8) && !demo.GetWall(px, py - 1))
-          {
-            Console.SetCursorPosition(px, py - 1); Console.Write(charWalked);
-            py -= 2;
-          }
-          if ((key == ConsoleKey.DownArrow || key == ConsoleKey.S || key == ConsoleKey.NumPad2) && !demo.GetWall(px, py + 1))
-          {
-            Console.SetCursorPosition(px, py + 1); Console.Write(charWalked);
-            py += 2;
+            finishMode = !finishMode;
           }
 
-          if (px == 1 && py == 1)
+          if (finishMode)
+          {
+            Console.SetCursorPosition(fx, fy);
+            Console.ForegroundColor = colorWalked;
+            Console.Write(charWalked);
+
+            if ((key == ConsoleKey.LeftArrow || key == ConsoleKey.A || key == ConsoleKey.NumPad4) && !demo.GetWall(fx - 1, fy))
+            {
+              Console.SetCursorPosition(fx - 1, fy); Console.Write(charWalked);
+              fx -= 2;
+            }
+            if ((key == ConsoleKey.RightArrow || key == ConsoleKey.D || key == ConsoleKey.NumPad6) && !demo.GetWall(fx + 1, fy))
+            {
+              Console.SetCursorPosition(fx + 1, fy); Console.Write(charWalked);
+              fx += 2;
+            }
+            if ((key == ConsoleKey.UpArrow || key == ConsoleKey.W || key == ConsoleKey.NumPad8) && !demo.GetWall(fx, fy - 1))
+            {
+              Console.SetCursorPosition(fx, fy - 1); Console.Write(charWalked);
+              fy -= 2;
+            }
+            if ((key == ConsoleKey.DownArrow || key == ConsoleKey.S || key == ConsoleKey.NumPad2) && !demo.GetWall(fx, fy + 1))
+            {
+              Console.SetCursorPosition(fx, fy + 1); Console.Write(charWalked);
+              fy += 2;
+            }
+          }
+          else
+          {
+            Console.SetCursorPosition(px, py);
+            Console.ForegroundColor = colorWalked;
+            Console.Write(charWalked);
+
+            if ((key == ConsoleKey.LeftArrow || key == ConsoleKey.A || key == ConsoleKey.NumPad4) && !demo.GetWall(px - 1, py))
+            {
+              Console.SetCursorPosition(px - 1, py); Console.Write(charWalked);
+              px -= 2;
+            }
+            if ((key == ConsoleKey.RightArrow || key == ConsoleKey.D || key == ConsoleKey.NumPad6) && !demo.GetWall(px + 1, py))
+            {
+              Console.SetCursorPosition(px + 1, py); Console.Write(charWalked);
+              px += 2;
+            }
+            if ((key == ConsoleKey.UpArrow || key == ConsoleKey.W || key == ConsoleKey.NumPad8) && !demo.GetWall(px, py - 1))
+            {
+              Console.SetCursorPosition(px, py - 1); Console.Write(charWalked);
+              py -= 2;
+            }
+            if ((key == ConsoleKey.DownArrow || key == ConsoleKey.S || key == ConsoleKey.NumPad2) && !demo.GetWall(px, py + 1))
+            {
+              Console.SetCursorPosition(px, py + 1); Console.Write(charWalked);
+              py += 2;
+            }
+          }
+
+          if (px == fx && py == fy)
           {
             level++;
             break;
