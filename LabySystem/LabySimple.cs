@@ -147,7 +147,14 @@ namespace LabySystem
     /// <returns>true, wenn das Spielfeld eine Wand/blockiert ist</returns>
     public bool GetWall(int x, int y)
     {
-      throw new NotImplementedException();
+      if (x < 0 || y < 0 || x >= pixelWidth || y >= pixelHeight) throw new ArgumentOutOfRangeException();
+
+      if ((x & 1) + (y & 1) == 0) return true;
+      if ((x & 1) + (y & 1) == 2) return false;
+
+      Knot64 knot = field[(x + 1) / 2 + (y + 1) / 2 * fieldWidth];
+
+      return (x & 1) == 0 ? knot.WallTop : knot.WallLeft;
     }
     #endregion
   }
