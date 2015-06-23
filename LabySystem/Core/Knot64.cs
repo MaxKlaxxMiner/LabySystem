@@ -86,5 +86,27 @@ namespace LabySystem.Core
     {
       return "[" + WallNumber + "] Top: " + WallTop + ", Left: " + WallLeft;
     }
+
+    /// <summary>
+    /// erstellt das Basis-Spielfeld
+    /// </summary>
+    /// <param name="w">Breite des Spielfeldes in Knoten</param>
+    /// <param name="h">Höhe des Spielfeldes in Knoten</param>
+    /// <returns>Enumerable mit allen Spielfeldern</returns>
+    public static IEnumerable<Knot64> CreateBaseKnotes(long w, long h)
+    {
+      w--; h--;
+      for (long y = 0; y <= h; y++)
+      {
+        for (long x = 0; x <= w; x++)
+        {
+          bool top = (x == 0 || x == w) && y > 0;
+          bool left = (y == 0 || y == h) && x > 0;
+          long number = top || left ? 0 : x + y * w;
+
+          yield return new Knot64(number, top, left);
+        }
+      }
+    }
   }
 }
