@@ -15,12 +15,8 @@ namespace LabyConsole
   {
     static void Main()
     {
-      int level = 0;
-      int levelMax = 10;
-      int gameWidthMax = (Console.WindowWidth - 1) * 2 / 2 - 1;
-      int gameHeightMax = (Console.WindowHeight - 1) * 2 / 2 - 1;
-
-      Console.Title = "Laby " + gameWidthMax + " x " + gameHeightMax;
+      int level = 2;
+      int levelMax = 45;
 
       var charRoom = ' ';
       var colorRoom = ConsoleColor.DarkGray;
@@ -40,16 +36,13 @@ namespace LabyConsole
       var charWalked2 = '\x2591';
       var colorWalked2 = ConsoleColor.Yellow;
 
-      while (level <= levelMax)
+      while (level < levelMax)
       {
-        int gameWidth = (gameWidthMax * level / levelMax) / 2 * 2 + 1;
-        int gameHeight = (gameHeightMax * level / levelMax) / 2 * 2 + 1;
-
         Console.ForegroundColor = colorMan;
         Console.BackgroundColor = colorRoom;
         Console.Write("generate...");
 
-        ILaby laby = new LabySimpleFast(gameWidth, gameHeight, (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372) * gameWidth * gameHeight);
+        ILaby laby = new LabySimpleFast(level * 5, level * 3, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
         LabyGame game = new LabyGame(laby);
 
         while (laby.Generate(10000) > 0) { }
