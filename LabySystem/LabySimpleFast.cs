@@ -230,6 +230,7 @@ namespace LabySystem
 
       rnd = _rnd;
 
+      if (remainList.Length > 0 && remainTicks > 0) return remainTicks;
       return remainList.Length;
     }
 
