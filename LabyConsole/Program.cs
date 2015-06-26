@@ -41,7 +41,7 @@ namespace LabyConsole
 
       StringBuilder output = new StringBuilder();
 
-      int maxX = Console.WindowWidth - 1;
+      int maxX = Console.WindowWidth - 2;
       int maxY = Console.WindowHeight - 2;
       for (int y = offsetY; y < laby.Height; y++)
       {
@@ -72,9 +72,9 @@ namespace LabyConsole
             default: output.Append(charRoom); break;
           }
 
-          if (x == laby.Width - 1) output.AppendLine();
           if (x - offsetX >= maxX) break;
         }
+        output.AppendLine();
         if (y - offsetY >= maxY) break;
       }
 
