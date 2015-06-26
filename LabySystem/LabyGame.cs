@@ -127,7 +127,38 @@ namespace LabySystem
 
     #region # // --- public Methoden ---
 
-    #region # // --- public Abfrage-Methoden und -Properties
+    #region # // --- public static Methoden ---
+    /// <summary>
+    /// gibt die Spielfeldgröße anhand eines bestimmten Levels zurück
+    /// </summary>
+    /// <param name="level">Level, welches abgefragt werden soll</param>
+    /// <returns>vorgeschlagene Höhe und Breite des Spielfeldes</returns>
+    public static Tuple<int, int> GetLevelSize(int level)
+    {
+      int full = 2;
+      int half = 3;
+      int multi = 1;
+      while (level > 1)
+      {
+        level--;
+        if (full < half)
+        {
+          multi = full;
+          full *= 2;
+        }
+        else
+        {
+          multi = half;
+          half *= 2;
+        }
+      }
+      return (multi & 1) == 0 ? new Tuple<int, int>(8 * multi - 1, 5 * multi - 1) 
+                              : new Tuple<int, int>(8 * multi - 1, 5 * multi);
+    }
+
+    #endregion
+
+    #region # // --- public Abfrage-Methoden und -Properties ---
     /// <summary>
     /// gibt die Breite des Spielfeldes in Pixeln zurück
     /// </summary>
@@ -170,7 +201,7 @@ namespace LabySystem
     }
     #endregion
 
-    #region # // --- public Update- und Steuerung-Methoden
+    #region # // --- public Update- und Steuerung-Methoden ---
     /// <summary>
     /// Setzt die Methode, welche aufgerufen werden soll, wenn sich ein Feld geändert hat
     /// </summary>
@@ -336,6 +367,5 @@ namespace LabySystem
       laby = null;
     }
     #endregion
-
   }
 }
