@@ -96,8 +96,6 @@ namespace LabySystem
     /// <param name="laby">bereits erstelltes Labyrinth</param>
     public LabyGame(ILaby laby)
     {
-      while (laby.Generate(10000) > 0) { } // Labyrinth zu Ende generieren lassen (sofern nicht geschehen)
-
       this.laby = laby;
       width = laby.Width;
       height = laby.Height;
@@ -120,7 +118,11 @@ namespace LabySystem
     /// <param name="width">Breite des Labyrinthes in Pixeln</param>
     /// <param name="height">Höhe des Labyrinthes in Pixeln</param>
     /// <param name="seed">Startwert für den Zufallsgenerator</param>
-    public LabyGame(int width, int height, int seed) : this(new LabySimpleFast(width, height, seed)) { }
+    public LabyGame(int width, int height, int seed)
+      : this(new LabySimpleFast(width, height, seed))
+    {
+      while (laby.Generate(10000) > 0) { } // Labyrinth generieren lassen
+    }
 
     /// <summary>
     /// Konstruktor
