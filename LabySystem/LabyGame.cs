@@ -54,6 +54,11 @@ namespace LabySystem
       roomVisitedSecond = 0x02,
 
       /// <summary>
+      /// stellt ein freies begehbares Feld dar, welches mehr als zweimal besucht wurde
+      /// </summary>
+      roomVisitedMore = 0x03,
+
+      /// <summary>
       /// aktuelle Spielerposition
       /// </summary>
       player = 0x10,
@@ -152,7 +157,7 @@ namespace LabySystem
           half *= 2;
         }
       }
-      return (multi & 1) == 0 ? new Tuple<int, int>(8 * multi - 1, 5 * multi - 1) 
+      return (multi & 1) == 0 ? new Tuple<int, int>(8 * multi - 1, 5 * multi - 1)
                               : new Tuple<int, int>(8 * multi - 1, 5 * multi);
     }
 
@@ -265,7 +270,8 @@ namespace LabySystem
 
       var result = FieldType.roomVisitedNone;
       int visit = Visit(posX, posY);
-      if (visit > 0) result |= (visit & 1) == 1 ? FieldType.roomVisitedFirst : FieldType.roomVisitedSecond;
+      if (visit > 0 && visit != 2) result |= FieldType.roomVisitedFirst;
+      if (visit > 1) result |= FieldType.roomVisitedSecond;
 
       if (posX == PlayerX && posY == PlayerY) result |= FieldType.player;
       if (posX == FinishX && posY == FinishY) result |= FieldType.finish;

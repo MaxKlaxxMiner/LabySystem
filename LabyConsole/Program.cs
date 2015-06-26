@@ -15,7 +15,7 @@ namespace LabyConsole
   {
     static void Main()
     {
-      int level = 2;
+      int level = 1;
       int levelMax = 45;
 
       var charRoom = ' ';
@@ -42,7 +42,7 @@ namespace LabyConsole
         Console.BackgroundColor = colorRoom;
         Console.Write("generate...");
 
-        ILaby laby = new LabySimpleFast(level * 5, level * 3, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+        ILaby laby = new LabySimpleFast(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
         LabyGame game = new LabyGame(laby);
 
         while (laby.Generate(10000) > 0) { }
@@ -79,23 +79,23 @@ namespace LabyConsole
               Console.Write(charWalked);
             } break;
             case LabyGame.FieldType.roomVisitedSecond:
+            case LabyGame.FieldType.roomVisitedMore:
             {
               Console.ForegroundColor = colorWalked2;
               Console.Write(charWalked2);
             } break;
-            case LabyGame.FieldType.player:
-            case LabyGame.FieldType.player | LabyGame.FieldType.roomVisitedFirst:
-            case LabyGame.FieldType.player | LabyGame.FieldType.roomVisitedSecond:
+            default:
             {
-              Console.ForegroundColor = colorMan;
-              Console.Write(charMen);
-            } break;
-            case LabyGame.FieldType.finish:
-            case LabyGame.FieldType.finish | LabyGame.FieldType.roomVisitedFirst:
-            case LabyGame.FieldType.finish | LabyGame.FieldType.roomVisitedSecond:
-            {
-              Console.ForegroundColor = colorFinish;
-              Console.Write(charFinish);
+              if ((t & LabyGame.FieldType.player) > 0)
+              {
+                Console.ForegroundColor = colorMan;
+                Console.Write(charMen);
+              }
+              else if ((t & LabyGame.FieldType.finish) > 0)
+              {
+                Console.ForegroundColor = colorFinish;
+                Console.Write(charFinish);
+              }
             } break;
           }
         });

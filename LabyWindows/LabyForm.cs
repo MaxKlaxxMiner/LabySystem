@@ -25,8 +25,7 @@ namespace LabyWindows
 
     Bitmap gamePicture = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
     Graphics gameGraphics;
-    int level;
-    static readonly int[] levels = { 192, 128, 96, 64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1 };
+    int level = 1;
     LabyGame labyGame;
     bool labyPlayer = true;
     Bitmap labyPicture;
@@ -52,9 +51,9 @@ namespace LabyWindows
     void InitGame()
     {
       if (labyGame != null) labyGame.Dispose();
-      labyGame = new LabyGame(1920 / levels[level], 1080 / levels[level], level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+      labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
       labyPlayer = true;
-      labyPicture = new Bitmap(labyGame.Width + 1, labyGame.Height + 1, PixelFormat.Format32bppRgb);
+      labyPicture = new Bitmap(labyGame.Width, labyGame.Height, PixelFormat.Format32bppRgb);
       labyGame.SetFieldChangeEvent((game, type, x, y) =>
       {
         switch (type)
@@ -62,7 +61,8 @@ namespace LabyWindows
           case LabyGame.FieldType.wall: labyPicture.SetPixel(x, y, Color.Black); break;
           case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, Color.LightGray); break;
           case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, Color.LightGoldenrodYellow); break;
-          case LabyGame.FieldType.roomVisitedSecond: labyPicture.SetPixel(x, y, Color.Yellow); break;
+          case LabyGame.FieldType.roomVisitedSecond:
+          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, Color.Yellow); break;
           default:
           {
             if ((type & LabyGame.FieldType.player) > 0) labyPicture.SetPixel(x, y, Color.Green);
