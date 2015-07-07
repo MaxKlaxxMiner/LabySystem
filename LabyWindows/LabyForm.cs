@@ -35,7 +35,7 @@ namespace LabyWindows
     /// <summary>
     /// minimale Kachelgröße in Pixeln (Multiplaikator von 2,2,2,2,3,5)
     /// </summary>
-    const int minWidth = 2 * 2 * 5;
+    const int minWidth = 2 * 2 * 3;
     const int fieldWidth = 1920 / minWidth;
     const int fieldHeight = 1080 / minWidth;
     const int fieldJumps = 6;
