@@ -89,21 +89,21 @@ namespace LabyWindows
     {
       switch (e.KeyCode)
       {
-        case Keys.A: labyGame.MoveLeft(); break;
+        case Keys.A:
         case Keys.NumPad4:
-        case Keys.Left: labyGame.MoveLeft(false); break;
+        case Keys.Left: labyGame.MoveLeft(labyPlayer); break;
 
-        case Keys.D: labyGame.MoveRight(); break;
+        case Keys.D:
         case Keys.NumPad6:
-        case Keys.Right: labyGame.MoveRight(false); break;
+        case Keys.Right: labyGame.MoveRight(labyPlayer); break;
 
-        case Keys.W: labyGame.MoveUp(); break;
+        case Keys.W:
         case Keys.NumPad8:
-        case Keys.Up: labyGame.MoveUp(false); break;
+        case Keys.Up: labyGame.MoveUp(labyPlayer); break;
 
-        case Keys.S: labyGame.MoveDown(); break;
+        case Keys.S:
         case Keys.NumPad2:
-        case Keys.Down: labyGame.MoveDown(false); break;
+        case Keys.Down: labyGame.MoveDown(labyPlayer); break;
 
         case Keys.Space: labyPlayer = !labyPlayer; break;
 
