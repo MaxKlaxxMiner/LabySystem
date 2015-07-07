@@ -35,7 +35,7 @@ namespace LabyWindows
     /// <summary>
     /// minimale Kachelgröße in Pixeln (Multiplaikator von 2,2,2,2,3,5)
     /// </summary>
-    const int minWidth = 2 * 2 * 3;
+    const int minWidth = 3 * 5;
     const int fieldWidth = 1920 / minWidth;
     const int fieldHeight = 1080 / minWidth;
     const int fieldJumps = 6;
@@ -82,7 +82,17 @@ namespace LabyWindows
       {
         switch (type)
         {
-          case LabyGame.FieldType.wall: labyPicture.SetPixel(x, y, Color.Black); break;
+          case LabyGame.FieldType.wall:
+          {
+            if (x == 0 || y == 0 || x == labyPicture.Width - 1 || y == labyPicture.Height - 1)
+            {
+              labyPicture.SetPixel(x, y, Color.DarkBlue);
+            }
+            else
+            {
+              labyPicture.SetPixel(x, y, Color.Black);
+            }
+          } break;
           case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, Color.LightGray); break;
           case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, Color.LightGoldenrodYellow); break;
           case LabyGame.FieldType.roomVisitedSecond:
