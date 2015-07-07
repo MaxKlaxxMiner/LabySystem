@@ -167,7 +167,7 @@ namespace LabyWindows
           }
         } break;
 
-        case Keys.Space: labyPlayer = !labyPlayer; break;
+        case Keys.Space: labyPlayer = !labyPlayer; goto case Keys.Enter;
 
         case Keys.Enter:
         {
