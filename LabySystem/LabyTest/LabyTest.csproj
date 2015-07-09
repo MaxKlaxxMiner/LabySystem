@@ -50,8 +50,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="LabyTests.cs" />
+    <Compile Include="LabySimpleTests.cs" />
+    <Compile Include="LabyCoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LabySystem.csproj">
+      <Project>{f31c4bbb-9373-4f4d-bff3-1010fca5a11c}</Project>
+      <Name>LabySystem</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
