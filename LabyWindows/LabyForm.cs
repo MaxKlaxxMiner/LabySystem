@@ -2,15 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using LabySystem;
-using System.Drawing.Imaging;
 
 #endregion
 
@@ -52,7 +49,7 @@ namespace LabyWindows
         gamePictureBox1.Image = gamePicture;
         if (gameGraphics != null) gameGraphics.Dispose();
         gameGraphics = Graphics.FromImage(gamePicture);
-        gameGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+        gameGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
       }
 
       if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
@@ -61,7 +58,7 @@ namespace LabyWindows
       }
       else
       {
-        gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f, -0.5f, (float)labyPicture.Width, (float)labyPicture.Height, GraphicsUnit.Pixel);
+        gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f, -0.5f, labyPicture.Width, labyPicture.Height, GraphicsUnit.Pixel);
       }
 
       gamePictureBox1.Refresh();
@@ -118,8 +115,8 @@ namespace LabyWindows
 
     private void LabyForm_Load(object sender, EventArgs e)
     {
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-      this.WindowState = FormWindowState.Maximized;
+      FormBorderStyle = FormBorderStyle.None;
+      WindowState = FormWindowState.Maximized;
       InitGame();
     }
 
