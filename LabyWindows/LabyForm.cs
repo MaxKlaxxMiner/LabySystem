@@ -32,7 +32,7 @@ namespace LabyWindows
     /// <summary>
     /// minimale Kachelgröße in Pixeln (Multiplikator von 2,2,2,2,3,5)
     /// </summary>
-    const int minWidth = 2 * 2 * 2 * 2;
+    const int minWidth = 2 * 2 * 2 * 3;
     const int fieldWidth = 1920 / minWidth;
     const int fieldHeight = 1080 / minWidth;
     const int fieldJumps = 6;
@@ -131,10 +131,6 @@ namespace LabyWindows
       FormBorderStyle = FormBorderStyle.None;
       WindowState = FormWindowState.Maximized;
       InitGame();
-    }
-
-    private void gameTimer_Tick(object sender, EventArgs e)
-    {
       DrawLaby();
     }
 
@@ -242,6 +238,8 @@ namespace LabyWindows
         level++;
         InitGame();
       }
+
+      DrawLaby();
     }
   }
 }
