@@ -33,7 +33,7 @@ namespace LabyWindows
     int offsetY;
 
     /// <summary>
-    /// minimale Kachelgröße in Pixeln (Multiplaikator von 2,2,2,2,3,5)
+    /// minimale Kachelgröße in Pixeln (Multiplikator von 2,2,2,2,3,5)
     /// </summary>
     const int minWidth = 2 * 2 * 2 * 2;
     const int fieldWidth = 1920 / minWidth;
