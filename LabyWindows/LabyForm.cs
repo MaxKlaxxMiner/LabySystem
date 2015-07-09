@@ -38,6 +38,7 @@ namespace LabyWindows
     const int fieldJumps = 6;
 
     List<Size> marker = new List<Size>();
+    bool zoomOut;
 
     void DrawLaby()
     {
@@ -52,13 +53,25 @@ namespace LabyWindows
         gameGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
       }
 
-      if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
+      if (zoomOut || (labyPicture.Width < fieldWidth || labyPicture.Height < fieldHeight))
       {
-        gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f + offsetX, -0.5f + offsetY, fieldWidth, fieldHeight, GraphicsUnit.Pixel);
+        gameGraphics.FillRectangle(new SolidBrush(Color.Gray), 0, 0, gamePicture.Width, gamePicture.Height);
+        int drawMul = 1;
+
+        while (labyPicture.Width * (drawMul + 1) < 1920 && labyPicture.Height * (drawMul + 1) < 1080) drawMul++;
+
+        if (drawMul > 1)
+        {
+          gameGraphics.DrawImage(labyPicture, new Rectangle((gamePicture.Width - labyPicture.Width * drawMul) / 2, (gamePicture.Height - labyPicture.Height * drawMul) / 2, labyPicture.Width * drawMul, labyPicture.Height * drawMul), -0.5f, -0.5f, labyPicture.Width, labyPicture.Height, GraphicsUnit.Pixel);
+        }
+        else
+        {
+          gameGraphics.DrawImage(labyPicture, (gamePicture.Width - labyPicture.Width) / 2, (gamePicture.Height - labyPicture.Height) / 2);
+        }
       }
       else
       {
-        gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f, -0.5f, labyPicture.Width, labyPicture.Height, GraphicsUnit.Pixel);
+        gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f + offsetX, -0.5f + offsetY, fieldWidth, fieldHeight, GraphicsUnit.Pixel);
       }
 
       gamePictureBox1.Refresh();
@@ -167,6 +180,8 @@ namespace LabyWindows
             goto case Keys.Control;
           }
         } break;
+
+        case Keys.Tab: zoomOut = !zoomOut; break;
 
         case Keys.S:
         case Keys.NumPad2:
