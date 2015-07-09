@@ -35,10 +35,12 @@ namespace LabyWindows
     /// <summary>
     /// minimale Kachelgröße in Pixeln (Multiplaikator von 2,2,2,2,3,5)
     /// </summary>
-    const int minWidth = 3 * 5;
+    const int minWidth = 2 * 2 * 2 * 2;
     const int fieldWidth = 1920 / minWidth;
     const int fieldHeight = 1080 / minWidth;
     const int fieldJumps = 6;
+
+    List<Size> marker = new List<Size>();
 
     void DrawLaby()
     {
@@ -71,12 +73,17 @@ namespace LabyWindows
     /// </summary>
     void InitGame()
     {
+      if (level > 1)
+      {
+        MessageBox.Show("Level: " + level + " (" + LabyGame.GetLevelSize(level).Item1.ToString("#,##0") + " x " + LabyGame.GetLevelSize(level).Item2.ToString("#,##0") + ")", "next Level");
+      }
       if (labyGame != null) labyGame.Dispose();
       labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
       labyPlayer = true;
       labyPicture = new Bitmap(labyGame.Width, labyGame.Height, PixelFormat.Format32bppRgb);
       offsetX = 0;
       offsetY = 0;
+      marker = new List<Size>();
       #region # // --- Spielfeld zeichnen ---
       labyGame.SetFieldChangeEvent((game, type, x, y) =>
       {
@@ -94,9 +101,9 @@ namespace LabyWindows
             }
           } break;
           case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, Color.LightGray); break;
-          case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, Color.LightGoldenrodYellow); break;
+          case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, marker.Any(m => m.Width == x && m.Height == y) ? Color.Coral : Color.LightGoldenrodYellow); break;
           case LabyGame.FieldType.roomVisitedSecond:
-          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, Color.Yellow); break;
+          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, marker.Any(m => m.Width == x && m.Height == y) ? Color.Coral : Color.Yellow); break;
           default:
           {
             if ((type & LabyGame.FieldType.player) > 0) labyPicture.SetPixel(x, y, Color.Green);
@@ -178,6 +185,12 @@ namespace LabyWindows
         } break;
 
         case Keys.Space: labyPlayer = !labyPlayer; goto case Keys.Enter;
+
+        case Keys.Back:
+        {
+          marker.Add(labyPlayer ? new Size(labyGame.PlayerX, labyGame.PlayerY) : new Size(labyGame.FinishX, labyGame.FinishY));
+          if (marker.Count > 100) marker.RemoveAt(0);
+        } break;
 
         case Keys.Enter:
         {
