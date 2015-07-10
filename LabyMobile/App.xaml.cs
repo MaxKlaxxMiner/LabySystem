@@ -61,14 +61,11 @@ namespace LabyMobile
       if (rootFrame == null)
       {
         // Einen Rahmen erstellen, der als Navigationskontext fungiert und zum Parameter der ersten Seite navigieren
-        rootFrame = new Frame();
-
-        // TODO: diesen Wert auf eine Cachegröße ändern, die für Ihre Anwendung geeignet ist
-        rootFrame.CacheSize = 1;
+        rootFrame = new Frame { CacheSize = 1 };
 
         if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
         {
-          // TODO: Zustand von zuvor angehaltener Anwendung laden
+          // Hier: Zustand von zuvor angehaltener Anwendung laden
         }
 
         // Den Rahmen im aktuellen Fenster platzieren
