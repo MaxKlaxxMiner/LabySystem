@@ -2,15 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using LabySystem;
-using System.Drawing.Imaging;
 
 #endregion
 
@@ -29,6 +26,17 @@ namespace LabyWindows
     LabyGame labyGame;
     bool labyPlayer = true;
     Bitmap labyPicture;
+    int offsetX;
+    int offsetY;
+
+    int zoomLevel = 14;
+    readonly int[] zoomsWidth = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 96, 120 };
+    int fieldWidth;
+    int fieldHeight;
+    const int fieldJumps = 6;
+
+    List<Size> marker = new List<Size>();
+    bool zoomOut;
 
     void DrawLaby()
     {
@@ -40,29 +48,72 @@ namespace LabyWindows
         gamePictureBox1.Image = gamePicture;
         if (gameGraphics != null) gameGraphics.Dispose();
         gameGraphics = Graphics.FromImage(gamePicture);
-        gameGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+        gameGraphics.InterpolationMode = InterpolationMode.NearestNeighbor;
       }
 
-      gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f, -0.5f, (float)labyPicture.Width, (float)labyPicture.Height, GraphicsUnit.Pixel);
+      if (zoomOut || (labyPicture.Width < fieldWidth || labyPicture.Height < fieldHeight))
+      {
+        gameGraphics.FillRectangle(new SolidBrush(Color.Gray), 0, 0, gamePicture.Width, gamePicture.Height);
+        int drawMul = 1;
+
+        while (labyPicture.Width * (drawMul + 1) < 1920 && labyPicture.Height * (drawMul + 1) < 1080) drawMul++;
+
+        if (drawMul > 1)
+        {
+          gameGraphics.DrawImage(labyPicture, new Rectangle((gamePicture.Width - labyPicture.Width * drawMul) / 2, (gamePicture.Height - labyPicture.Height * drawMul) / 2, labyPicture.Width * drawMul, labyPicture.Height * drawMul), -0.5f, -0.5f, labyPicture.Width, labyPicture.Height, GraphicsUnit.Pixel);
+        }
+        else
+        {
+          gameGraphics.DrawImage(labyPicture, (gamePicture.Width - labyPicture.Width) / 2, (gamePicture.Height - labyPicture.Height) / 2);
+        }
+      }
+      else
+      {
+        gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f + offsetX, -0.5f + offsetY, fieldWidth, fieldHeight, GraphicsUnit.Pixel);
+      }
 
       gamePictureBox1.Refresh();
     }
 
+    #region # void InitGame() // Spielfeld initialisieren und zeichnen
+    /// <summary>
+    /// Spielfeld initialisieren und zeichnen
+    /// </summary>
     void InitGame()
     {
+      if (level > 1)
+      {
+        MessageBox.Show("Level: " + level + " (" + LabyGame.GetLevelSize(level).Item1.ToString("#,##0") + " x " + LabyGame.GetLevelSize(level).Item2.ToString("#,##0") + ")", "next Level");
+      }
       if (labyGame != null) labyGame.Dispose();
       labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
       labyPlayer = true;
       labyPicture = new Bitmap(labyGame.Width, labyGame.Height, PixelFormat.Format32bppRgb);
+      offsetX = 0;
+      offsetY = 0;
+      marker = new List<Size>();
+      fieldWidth = 1920 / zoomsWidth[zoomLevel];
+      fieldHeight = 1080 / zoomsWidth[zoomLevel];
+      #region # // --- Spielfeld zeichnen ---
       labyGame.SetFieldChangeEvent((game, type, x, y) =>
       {
         switch (type)
         {
-          case LabyGame.FieldType.wall: labyPicture.SetPixel(x, y, Color.Black); break;
+          case LabyGame.FieldType.wall:
+          {
+            if (x == 0 || y == 0 || x == labyPicture.Width - 1 || y == labyPicture.Height - 1)
+            {
+              labyPicture.SetPixel(x, y, Color.DarkBlue);
+            }
+            else
+            {
+              labyPicture.SetPixel(x, y, Color.Black);
+            }
+          } break;
           case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, Color.LightGray); break;
-          case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, Color.LightGoldenrodYellow); break;
+          case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, marker.Any(m => m.Width == x && m.Height == y) ? Color.Coral : Color.LightGoldenrodYellow); break;
           case LabyGame.FieldType.roomVisitedSecond:
-          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, Color.Yellow); break;
+          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, marker.Any(m => m.Width == x && m.Height == y) ? Color.Coral : Color.Yellow); break;
           default:
           {
             if ((type & LabyGame.FieldType.player) > 0) labyPicture.SetPixel(x, y, Color.Green);
@@ -71,17 +122,15 @@ namespace LabyWindows
         }
       });
       labyGame.UpdateAll();
+      #endregion
     }
+    #endregion
 
     private void LabyForm_Load(object sender, EventArgs e)
     {
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-      this.WindowState = FormWindowState.Maximized;
+      FormBorderStyle = FormBorderStyle.None;
+      WindowState = FormWindowState.Maximized;
       InitGame();
-    }
-
-    private void gameTimer_Tick(object sender, EventArgs e)
-    {
       DrawLaby();
     }
 
@@ -90,22 +139,113 @@ namespace LabyWindows
       switch (e.KeyCode)
       {
         case Keys.A:
+        case Keys.NumPad4:
         case Keys.Left:
-        case Keys.NumPad4: labyGame.MoveLeft(labyPlayer); break;
+        {
+          labyGame.MoveLeft(labyPlayer);
+          if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) < offsetX + fieldJumps)
+          {
+            offsetX = labyPlayer ? labyGame.PlayerX : labyGame.FinishX;
+            offsetX -= fieldWidth / 2;
+            goto case Keys.Control;
+          }
+        } break;
 
         case Keys.D:
+        case Keys.NumPad6:
         case Keys.Right:
-        case Keys.NumPad6: labyGame.MoveRight(labyPlayer); break;
+        {
+          labyGame.MoveRight(labyPlayer);
+          if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) >= offsetX + fieldWidth - fieldJumps)
+          {
+            offsetX = labyPlayer ? labyGame.PlayerX : labyGame.FinishX;
+            offsetX -= fieldWidth / 2;
+            goto case Keys.Control;
+          }
+        } break;
 
         case Keys.W:
+        case Keys.NumPad8:
         case Keys.Up:
-        case Keys.NumPad8: labyGame.MoveUp(labyPlayer); break;
+        {
+          labyGame.MoveUp(labyPlayer);
+          if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) < offsetY + fieldJumps)
+          {
+            offsetY = labyPlayer ? labyGame.PlayerY : labyGame.FinishY;
+            offsetY -= fieldHeight / 2;
+            goto case Keys.Control;
+          }
+        } break;
+
+        case Keys.Tab: zoomOut = !zoomOut; break;
 
         case Keys.S:
+        case Keys.NumPad2:
         case Keys.Down:
-        case Keys.NumPad2: labyGame.MoveDown(labyPlayer); break;
+        {
+          labyGame.MoveDown(labyPlayer);
+          if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) >= offsetY + fieldHeight - fieldJumps)
+          {
+            offsetY = labyPlayer ? labyGame.PlayerY : labyGame.FinishY;
+            offsetY -= fieldHeight / 2;
+            goto case Keys.Control;
+          }
+        } break;
 
-        case Keys.Space: labyPlayer = !labyPlayer; break;
+        case Keys.Space: labyPlayer = !labyPlayer; goto case Keys.Enter;
+
+        case Keys.Back:
+        {
+          marker.Add(labyPlayer ? new Size(labyGame.PlayerX, labyGame.PlayerY) : new Size(labyGame.FinishX, labyGame.FinishY));
+          if (marker.Count > 100) marker.RemoveAt(0);
+        } break;
+
+        case Keys.Add:
+        {
+          zoomLevel = Math.Min(zoomLevel + 1, zoomsWidth.Length - 1);
+          fieldWidth = 1920 / zoomsWidth[zoomLevel];
+          fieldHeight = 1080 / zoomsWidth[zoomLevel];
+          goto case Keys.Enter;
+        }
+
+        case Keys.Subtract:
+        {
+          zoomLevel = Math.Max(zoomLevel - 1, 0);
+          fieldWidth = 1920 / zoomsWidth[zoomLevel];
+          fieldHeight = 1080 / zoomsWidth[zoomLevel];
+          goto case Keys.Enter;
+        }
+
+        case Keys.Enter:
+        {
+          if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
+          {
+            if (labyPlayer)
+            {
+              offsetX = labyGame.PlayerX;
+              offsetY = labyGame.PlayerY;
+            }
+            else
+            {
+              offsetX = labyGame.FinishX;
+              offsetY = labyGame.FinishY;
+            }
+            offsetX -= fieldWidth / 2;
+            offsetY -= fieldHeight / 2;
+          }
+          goto case Keys.Control;
+        }
+
+        case Keys.Control:
+        {
+          if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
+          {
+            if (offsetX < 0) offsetX = 0;
+            if (offsetY < 0) offsetY = 0;
+            if (offsetX > labyPicture.Width - fieldWidth) offsetX = labyPicture.Width - fieldWidth;
+            if (offsetY > labyPicture.Height - fieldHeight) offsetY = labyPicture.Height - fieldHeight;
+          }
+        } break;
 
         case Keys.Escape: Close(); break;
       }
@@ -115,6 +255,8 @@ namespace LabyWindows
         level++;
         InitGame();
       }
+
+      DrawLaby();
     }
   }
 }

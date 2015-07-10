@@ -28,9 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.components = new System.ComponentModel.Container();
       this.gamePictureBox1 = new System.Windows.Forms.PictureBox();
-      this.gameTimer = new System.Windows.Forms.Timer(this.components);
       ((System.ComponentModel.ISupportInitialize)(this.gamePictureBox1)).BeginInit();
       this.SuspendLayout();
       // 
@@ -42,12 +40,6 @@
       this.gamePictureBox1.Size = new System.Drawing.Size(1142, 600);
       this.gamePictureBox1.TabIndex = 0;
       this.gamePictureBox1.TabStop = false;
-      // 
-      // gameTimer
-      // 
-      this.gameTimer.Enabled = true;
-      this.gameTimer.Interval = 15;
-      this.gameTimer.Tick += new System.EventHandler(this.gameTimer_Tick);
       // 
       // LabyForm
       // 
@@ -67,7 +59,6 @@
     #endregion
 
     private System.Windows.Forms.PictureBox gamePictureBox1;
-    private System.Windows.Forms.Timer gameTimer;
   }
 }
 
