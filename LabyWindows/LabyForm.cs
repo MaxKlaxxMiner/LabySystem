@@ -205,13 +205,16 @@ namespace LabyWindows
           zoomLevel = Math.Min(zoomLevel + 1, zoomsWidth.Length - 1);
           fieldWidth = 1920 / zoomsWidth[zoomLevel];
           fieldHeight = 1080 / zoomsWidth[zoomLevel];
-        } break;
+          goto case Keys.Enter;
+        }
+
         case Keys.Subtract:
         {
           zoomLevel = Math.Max(zoomLevel - 1, 0);
           fieldWidth = 1920 / zoomsWidth[zoomLevel];
           fieldHeight = 1080 / zoomsWidth[zoomLevel];
-        } break;
+          goto case Keys.Enter;
+        }
 
         case Keys.Enter:
         {
@@ -232,6 +235,7 @@ namespace LabyWindows
           }
           goto case Keys.Control;
         }
+
         case Keys.Control:
         {
           if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
