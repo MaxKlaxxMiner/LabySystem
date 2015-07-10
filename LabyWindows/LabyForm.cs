@@ -29,12 +29,10 @@ namespace LabyWindows
     int offsetX;
     int offsetY;
 
-    /// <summary>
-    /// minimale Kachelgröße in Pixeln (Multiplikator von 2,2,2,2,3,5)
-    /// </summary>
-    const int minWidth = 2 * 2 * 2 * 3;
-    const int fieldWidth = 1920 / minWidth;
-    const int fieldHeight = 1080 / minWidth;
+    int zoomLevel = 14;
+    readonly int[] zoomsWidth = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 96, 120 };
+    int fieldWidth;
+    int fieldHeight;
     const int fieldJumps = 6;
 
     List<Size> marker = new List<Size>();
@@ -94,6 +92,8 @@ namespace LabyWindows
       offsetX = 0;
       offsetY = 0;
       marker = new List<Size>();
+      fieldWidth = 1920 / zoomsWidth[zoomLevel];
+      fieldHeight = 1080 / zoomsWidth[zoomLevel];
       #region # // --- Spielfeld zeichnen ---
       labyGame.SetFieldChangeEvent((game, type, x, y) =>
       {
@@ -198,6 +198,19 @@ namespace LabyWindows
         {
           marker.Add(labyPlayer ? new Size(labyGame.PlayerX, labyGame.PlayerY) : new Size(labyGame.FinishX, labyGame.FinishY));
           if (marker.Count > 100) marker.RemoveAt(0);
+        } break;
+
+        case Keys.Add:
+        {
+          zoomLevel = Math.Min(zoomLevel + 1, zoomsWidth.Length - 1);
+          fieldWidth = 1920 / zoomsWidth[zoomLevel];
+          fieldHeight = 1080 / zoomsWidth[zoomLevel];
+        } break;
+        case Keys.Subtract:
+        {
+          zoomLevel = Math.Max(zoomLevel - 1, 0);
+          fieldWidth = 1920 / zoomsWidth[zoomLevel];
+          fieldHeight = 1080 / zoomsWidth[zoomLevel];
         } break;
 
         case Keys.Enter:
