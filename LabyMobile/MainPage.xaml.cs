@@ -57,7 +57,7 @@ namespace LabyMobile
 
     private unsafe void Image_Tapped(object sender, TappedRoutedEventArgs e)
     {
-      int level = 8;
+      int level = 5;
       var labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item1, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
       bool labyPlayer = true;
 
@@ -70,7 +70,7 @@ namespace LabyMobile
       {
         switch (type)
         {
-          case LabyGame.FieldType.wall: fieldPixels[x + y * fieldWidth] = 0x000000; break;
+          case LabyGame.FieldType.wall: fieldPixels[x + y * fieldWidth] = x == 0 || y == 0 || x == fieldWidth - 1 || y == fieldHeight - 1 ? 0x00008b : 0x000000; break;
           case LabyGame.FieldType.roomVisitedNone: fieldPixels[x + y * fieldWidth] = 0xd3d3d3; break;
           case LabyGame.FieldType.roomVisitedFirst: fieldPixels[x + y * fieldWidth] = 0xfafad2; break;
           case LabyGame.FieldType.roomVisitedSecond:
@@ -85,7 +85,7 @@ namespace LabyMobile
       labyGame.UpdateAll();
 
 
-      int imgMulti = 4;
+      int imgMulti = 8;
 
       int imgWidth = fieldWidth * imgMulti;
       int imgHeight = fieldHeight * imgMulti;
