@@ -2,13 +2,20 @@
     x:Class="LabyMobile.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:LabyMobile"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Height="640"
+    Width="380">
 
-    <Grid>
+  <Grid>
+    <Button Content="Fump !" HorizontalAlignment="Left" Margin="75.501,445.333,0,0" VerticalAlignment="Top" Height="124" Width="236" RenderTransformOrigin="0.5,0.5" FontSize="47" Click="Button_Click" UseLayoutRounding="False" d:LayoutRounding="Auto">
+      <Button.RenderTransform>
+        <CompositeTransform Rotation="-22.627"/>
+      </Button.RenderTransform>
+    </Button>
+    <Image x:Name="TestBild" HorizontalAlignment="Left" Height="380" VerticalAlignment="Top" Width="380" Source="Assets/Logo.png" Tapped="Image_Tapped"/>
 
-    </Grid>
+  </Grid>
 </Page>
