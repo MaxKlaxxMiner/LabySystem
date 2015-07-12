@@ -35,7 +35,8 @@ namespace LabyWindows
     int fieldHeight;
     const int fieldJumps = 6;
 
-    List<Size> marker = new List<Size>();
+    List<Point> marker = new List<Point>();
+    List<Point> deadLines = new List<Point>();
     bool zoomOut;
 
     void DrawLaby()
@@ -74,6 +75,73 @@ namespace LabyWindows
 
       gamePictureBox1.Refresh();
     }
+    void DeadLineScan(int startX, int startY, int posX, int posY, int endX, int endY, int deadLimit)
+    {
+      HashSet<uint> ok = new HashSet<uint>();
+      Stack<Point> todo = new Stack<Point>();
+      todo.Push(new Point(posX, posY));
+      List<Point> deadMarker = new List<Point>();
+      int width = labyGame.Width - 2;
+      int height = labyGame.Height - 2;
+
+      while (todo.Count > 0)
+      {
+        var set = todo.Pop();
+        uint id = (uint)set.X + (uint)set.Y * (uint)65536;
+        if (ok.Contains(id)) continue;
+        ok.Add(id);
+        if (ok.Count > deadLimit) return;
+        if (labyGame.GetField(set.X, set.Y) != LabyGame.FieldType.wall)
+        {
+          if (set.X == startX && set.Y == startY) continue;
+          if (set.X == endX && set.Y == endY) return;
+          if (set.X == 1 && set.Y == 1) return;
+          if (set.X == width && set.Y == height) return;
+          deadMarker.Add(set);
+          todo.Push(new Point(set.X - 1, set.Y));
+          todo.Push(new Point(set.X + 1, set.Y));
+          todo.Push(new Point(set.X, set.Y - 1));
+          todo.Push(new Point(set.X, set.Y + 1));
+        }
+      }
+
+      deadLines.AddRange(deadMarker);
+    }
+
+    void DeadLineScan(int startX, int startY, int endX, int endY, int deadLimit)
+    {
+      DeadLineScan(startX, startY, startX - 1, startY, endX, endY, deadLimit);
+      DeadLineScan(startX, startY, startX + 1, startY, endX, endY, deadLimit);
+      DeadLineScan(startX, startY, startX, startY - 1, endX, endY, deadLimit);
+      DeadLineScan(startX, startY, startX, startY + 1, endX, endY, deadLimit);
+    }
+
+    void DeadLineScanner()
+    {
+//      var temp = deadLines.ToArray();
+      deadLines.Clear();
+
+      //foreach (var dl in temp)
+      //{
+      //  labyGame.Update(dl.X, dl.Y);
+      //}
+
+      int deadLimit = 10000;
+
+      if (labyPlayer)
+      {
+        DeadLineScan(labyGame.PlayerX, labyGame.PlayerY, labyGame.FinishX, labyGame.FinishY, deadLimit);
+      }
+      else
+      {
+        DeadLineScan(labyGame.FinishX, labyGame.FinishY, labyGame.PlayerX, labyGame.PlayerY, deadLimit);
+      }
+
+      foreach (var dl in deadLines)
+      {
+        labyGame.Update(dl.X, dl.Y);
+      }
+    }
 
     #region # void InitGame() // Spielfeld initialisieren und zeichnen
     /// <summary>
@@ -91,7 +159,8 @@ namespace LabyWindows
       labyPicture = new Bitmap(labyGame.Width, labyGame.Height, PixelFormat.Format32bppRgb);
       offsetX = 0;
       offsetY = 0;
-      marker = new List<Size>();
+      marker.Clear();
+      deadLines.Clear();
       fieldWidth = 1920 / zoomsWidth[zoomLevel];
       fieldHeight = 1080 / zoomsWidth[zoomLevel];
       #region # // --- Spielfeld zeichnen ---
@@ -110,10 +179,10 @@ namespace LabyWindows
               labyPicture.SetPixel(x, y, Color.Black);
             }
           } break;
-          case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, Color.LightGray); break;
-          case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, marker.Any(m => m.Width == x && m.Height == y) ? Color.Coral : Color.LightGoldenrodYellow); break;
+          case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, deadLines.Any(m => m.X == x && m.Y == y) ? Color.PaleVioletRed : Color.LightGray); break;
+          case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, marker.Any(m => m.X == x && m.Y == y) ? Color.Coral : Color.LightGoldenrodYellow); break;
           case LabyGame.FieldType.roomVisitedSecond:
-          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, marker.Any(m => m.Width == x && m.Height == y) ? Color.Coral : Color.Yellow); break;
+          case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, marker.Any(m => m.X == x && m.Y == y) ? Color.Coral : Color.Yellow); break;
           default:
           {
             if ((type & LabyGame.FieldType.player) > 0) labyPicture.SetPixel(x, y, Color.Green);
@@ -208,7 +277,7 @@ namespace LabyWindows
 
         case Keys.Back:
         {
-          marker.Add(labyPlayer ? new Size(labyGame.PlayerX, labyGame.PlayerY) : new Size(labyGame.FinishX, labyGame.FinishY));
+          marker.Add(labyPlayer ? new Point(labyGame.PlayerX, labyGame.PlayerY) : new Point(labyGame.FinishX, labyGame.FinishY));
           if (marker.Count > 100) marker.RemoveAt(0);
         } break;
 
@@ -268,6 +337,7 @@ namespace LabyWindows
         InitGame();
       }
 
+      DeadLineScanner();
       DrawLaby();
     }
   }
