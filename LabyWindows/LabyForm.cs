@@ -29,7 +29,7 @@ namespace LabyWindows
     int offsetX;
     int offsetY;
 
-    int zoomLevel = 14;
+    int zoomLevel = 6;
     readonly int[] zoomsWidth = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60, 96, 120 };
     int fieldWidth;
     int fieldHeight;
@@ -138,9 +138,12 @@ namespace LabyWindows
     {
       switch (e.KeyCode)
       {
+        case Keys.Left:
+        {
+          labyGame.MoveLeft(!labyPlayer);
+        } break;
         case Keys.A:
         case Keys.NumPad4:
-        case Keys.Left:
         {
           labyGame.MoveLeft(labyPlayer);
           if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) < offsetX + fieldJumps)
@@ -151,9 +154,12 @@ namespace LabyWindows
           }
         } break;
 
+        case Keys.Right:
+        {
+          labyGame.MoveRight(!labyPlayer);
+        } break;
         case Keys.D:
         case Keys.NumPad6:
-        case Keys.Right:
         {
           labyGame.MoveRight(labyPlayer);
           if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) >= offsetX + fieldWidth - fieldJumps)
@@ -164,9 +170,12 @@ namespace LabyWindows
           }
         } break;
 
+        case Keys.Up:
+        {
+          labyGame.MoveUp(!labyPlayer);
+        } break;
         case Keys.W:
         case Keys.NumPad8:
-        case Keys.Up:
         {
           labyGame.MoveUp(labyPlayer);
           if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) < offsetY + fieldJumps)
@@ -179,9 +188,12 @@ namespace LabyWindows
 
         case Keys.Tab: zoomOut = !zoomOut; break;
 
+        case Keys.Down:
+        {
+          labyGame.MoveDown(!labyPlayer);
+        } break;
         case Keys.S:
         case Keys.NumPad2:
-        case Keys.Down:
         {
           labyGame.MoveDown(labyPlayer);
           if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) >= offsetY + fieldHeight - fieldJumps)
