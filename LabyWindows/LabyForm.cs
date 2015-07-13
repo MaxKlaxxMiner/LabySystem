@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using LabySystem;
 
@@ -22,7 +23,7 @@ namespace LabyWindows
 
     Bitmap gamePicture = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
     Graphics gameGraphics;
-    int level = 1;
+    int level = 18;
     LabyGame labyGame;
     bool labyPlayer = true;
     Bitmap labyPicture;
@@ -35,8 +36,8 @@ namespace LabyWindows
     int fieldHeight;
     const int fieldJumps = 6;
 
-    List<Point> marker = new List<Point>();
-    List<Point> deadLines = new List<Point>();
+    readonly List<Point> marker = new List<Point>();
+    readonly List<Point> deadLines = new List<Point>();
     bool zoomOut;
 
     void DrawLaby()
@@ -87,7 +88,7 @@ namespace LabyWindows
       while (todo.Count > 0)
       {
         var set = todo.Pop();
-        uint id = (uint)set.X + (uint)set.Y * (uint)65536;
+        uint id = (uint)set.X + (uint)set.Y * 65536;
         if (ok.Contains(id)) continue;
         ok.Add(id);
         if (ok.Count > deadLimit) return;
@@ -126,7 +127,7 @@ namespace LabyWindows
       //  labyGame.Update(dl.X, dl.Y);
       //}
 
-      int deadLimit = 10000;
+      const int deadLimit = 100000;
 
       if (labyPlayer)
       {
@@ -164,6 +165,44 @@ namespace LabyWindows
       fieldWidth = 1920 / zoomsWidth[zoomLevel];
       fieldHeight = 1080 / zoomsWidth[zoomLevel];
       #region # // --- Spielfeld zeichnen ---
+
+      int labyLine = labyPicture.Width;
+      int[] fastPixel = new int[labyPicture.Width * labyPicture.Height];
+
+      labyGame.SetFieldChangeEvent((game, type, x, y) =>
+      {
+        Color f;
+        switch (type)
+        {
+          case LabyGame.FieldType.wall:
+          {
+            if (x == 0 || y == 0 || x == labyPicture.Width - 1 || y == labyPicture.Height - 1)
+            {
+              f = Color.DarkBlue;
+            }
+            else
+            {
+              f = Color.Black;
+            }
+          } break;
+          case LabyGame.FieldType.roomVisitedNone:
+          case LabyGame.FieldType.roomVisitedFirst:
+          case LabyGame.FieldType.roomVisitedSecond:
+          case LabyGame.FieldType.roomVisitedMore: f = Color.LightGray; break;
+          default:
+          {
+            f = Color.White;
+            if ((type & LabyGame.FieldType.player) > 0) f = Color.Green;
+            if ((type & LabyGame.FieldType.finish) > 0) f = Color.DarkRed;
+          } break;
+        }
+        fastPixel[x + y * labyLine] = f.ToArgb();
+      });
+      labyGame.UpdateAll();
+      var bitmapData = labyPicture.LockBits(new Rectangle(0, 0, labyPicture.Width, labyPicture.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
+      Marshal.Copy(fastPixel, 0, bitmapData.Scan0, fastPixel.Length);
+      labyPicture.UnlockBits(bitmapData);
+
       labyGame.SetFieldChangeEvent((game, type, x, y) =>
       {
         switch (type)
@@ -190,7 +229,6 @@ namespace LabyWindows
           } break;
         }
       });
-      labyGame.UpdateAll();
       #endregion
     }
     #endregion
