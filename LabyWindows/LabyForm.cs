@@ -23,7 +23,7 @@ namespace LabyWindows
 
     Bitmap gamePicture = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
     Graphics gameGraphics;
-    int level = 18;
+    int level = 1;
     LabyGame labyGame;
     bool labyPlayer = true;
     Bitmap labyPicture;
@@ -119,7 +119,7 @@ namespace LabyWindows
 
     void DeadLineScanner()
     {
-//      var temp = deadLines.ToArray();
+      //      var temp = deadLines.ToArray();
       deadLines.Clear();
 
       //foreach (var dl in temp)
@@ -164,8 +164,8 @@ namespace LabyWindows
       deadLines.Clear();
       fieldWidth = 1920 / zoomsWidth[zoomLevel];
       fieldHeight = 1080 / zoomsWidth[zoomLevel];
-      #region # // --- Spielfeld zeichnen ---
 
+      #region # // --- Spielfeld zeichnen ---
       int labyLine = labyPicture.Width;
       int[] fastPixel = new int[labyPicture.Width * labyPicture.Height];
 
@@ -174,17 +174,7 @@ namespace LabyWindows
         Color f;
         switch (type)
         {
-          case LabyGame.FieldType.wall:
-          {
-            if (x == 0 || y == 0 || x == labyPicture.Width - 1 || y == labyPicture.Height - 1)
-            {
-              f = Color.DarkBlue;
-            }
-            else
-            {
-              f = Color.Black;
-            }
-          } break;
+          case LabyGame.FieldType.wall: f = Color.Black; break;
           case LabyGame.FieldType.roomVisitedNone:
           case LabyGame.FieldType.roomVisitedFirst:
           case LabyGame.FieldType.roomVisitedSecond:
@@ -199,10 +189,24 @@ namespace LabyWindows
         fastPixel[x + y * labyLine] = f.ToArgb();
       });
       labyGame.UpdateAll();
+
+      for (int x = 0; x < labyPicture.Width; x++)
+      {
+        fastPixel[x] = Color.DarkBlue.ToArgb();
+        fastPixel[x + (labyPicture.Height - 1) * labyLine] = Color.DarkBlue.ToArgb();
+      }
+
+      for (int y = 0; y < labyPicture.Height; y++)
+      {
+        fastPixel[y * labyLine] = Color.DarkBlue.ToArgb();
+        fastPixel[labyLine - 1 + y * labyLine] = Color.DarkBlue.ToArgb();
+      }
+
       var bitmapData = labyPicture.LockBits(new Rectangle(0, 0, labyPicture.Width, labyPicture.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
       Marshal.Copy(fastPixel, 0, bitmapData.Scan0, fastPixel.Length);
       labyPicture.UnlockBits(bitmapData);
 
+      // --- zur direkten (langsameren) Methode wechseln ---
       labyGame.SetFieldChangeEvent((game, type, x, y) =>
       {
         switch (type)
