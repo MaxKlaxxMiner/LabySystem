@@ -50,15 +50,10 @@ namespace LabyMobile
       // wird dieses Ereignis für Sie behandelt.
     }
 
-    private void Button_Click(object sender, RoutedEventArgs e)
-    {
-      Application.Current.Exit();
-    }
-
     private unsafe void Image_Tapped(object sender, TappedRoutedEventArgs e)
     {
       int level = 5;
-      var labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item1, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+      var labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
       bool labyPlayer = true;
 
       int fieldWidth = labyGame.Width;
@@ -85,7 +80,7 @@ namespace LabyMobile
       labyGame.UpdateAll();
 
 
-      int imgMulti = 8;
+      int imgMulti = 1;
 
       int imgWidth = fieldWidth * imgMulti;
       int imgHeight = fieldHeight * imgMulti;
@@ -117,6 +112,25 @@ namespace LabyMobile
       }
 
       TestBild.Source = test;
+    }
+
+    private void ButtonUp_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+
+    }
+
+    private void ButtonLeft_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+
+    }
+
+    private void ButtonDown_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+
+    }
+
+    private void ButtonRight_Tapped(object sender, TappedRoutedEventArgs e)
+    {
 
     }
   }
