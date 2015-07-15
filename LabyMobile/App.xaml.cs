@@ -43,25 +43,36 @@ namespace LabyMobile
 
     public class Game
     {
-      public int level;
-      public LabyGame labyGame;
-      public bool labyPlayer;
-      public int fieldWidth;
-      public int fieldHeight;
-      public int[] fieldPixels;
-      public int imgMulti;
-      public int imgWidth;
-      public int imgHeight;
-      public WriteableBitmap imgBitmap;
+      int level;
+      LabyGame labyGame;
+      bool labyPlayer;
+      int fieldWidth;
+      int fieldHeight;
+      int[] fieldPixels;
+      int imgMulti;
+      int imgWidth;
+      int imgHeight;
+      WriteableBitmap imgBitmap;
+      byte[] imgBitmapBuf;
+      Image imgOutput;
 
-      public void InitGame()
+      public void InitGame(int startLevel, Image targetImage)
       {
+        if (targetImage != null) imgOutput = targetImage;
+        level = startLevel;
         fieldWidth = LabyGame.GetLevelSize(level).Item1;
-        fieldHeight = LabyGame.GetLevelSize(level).Item2;
+        fieldHeight = LabyGame.GetLevelSize(level).Item1;
         fieldPixels = new int[fieldWidth * fieldHeight];
 
         labyGame = new LabyGame(fieldWidth, fieldHeight, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
         labyPlayer = true;
+
+        imgMulti = 1;
+        while ((imgMulti + 1) * fieldWidth < 1024) imgMulti++;
+
+        imgWidth = fieldWidth * imgMulti;
+        imgHeight = fieldHeight * imgMulti;
+        imgBitmapBuf = new byte[imgWidth * imgHeight * 4];
 
         labyGame.SetFieldChangeEvent((game, type, x, y) =>
         {
@@ -71,62 +82,79 @@ namespace LabyMobile
             case LabyGame.FieldType.roomVisitedNone: fieldPixels[x + y * fieldWidth] = 0xd3d3d3; break;
             case LabyGame.FieldType.roomVisitedFirst: fieldPixels[x + y * fieldWidth] = 0xfafad2; break;
             case LabyGame.FieldType.roomVisitedSecond:
-            case LabyGame.FieldType.roomVisitedMore: fieldPixels[x + y * fieldWidth] = 0xff0000; break;
+            case LabyGame.FieldType.roomVisitedMore: fieldPixels[x + y * fieldWidth] = 0xffff00; break;
             default:
             {
               if ((type & LabyGame.FieldType.player) > 0) fieldPixels[x + y * fieldWidth] = 0x008000;
               if ((type & LabyGame.FieldType.finish) > 0) fieldPixels[x + y * fieldWidth] = 0x8b0000;
             } break;
           }
+          UpdateBitmap(x, y);
         });
         labyGame.UpdateAll();
 
-        imgMulti = 1;
-        while ((imgMulti + 1) * fieldWidth < 1024) imgMulti++;
-
-        imgWidth = fieldWidth * imgMulti;
-        imgHeight = fieldHeight * imgMulti;
         imgBitmap = new WriteableBitmap(imgWidth, imgHeight);
+        imgOutput.Source = imgBitmap;
 
-        UpdateBitmap();
+        PresentBitmap();
       }
 
-      public unsafe void UpdateBitmap()
+      unsafe void UpdateBitmap(int fieldX, int fieldY)
       {
-        byte[] buf = new byte[imgWidth * imgHeight * 4];
-        fixed (byte* _buf = buf)
+        fixed (byte* _buf = imgBitmapBuf)
         {
-          for (int y = 0; y < fieldHeight; y++)
+          int f = fieldPixels[fieldX + fieldY * fieldWidth];
+          int* pix = (int*)&_buf[(fieldX * imgMulti + fieldY * imgMulti * fieldWidth * imgMulti) * 4];
+          for (int cy = 0; cy < imgMulti; cy++)
           {
-            for (int x = 0; x < fieldWidth; x++)
+            for (int cx = 0; cx < imgMulti; cx++)
             {
-              int f = fieldPixels[x + y * fieldWidth];
-              int* pix = (int*)&_buf[(x * imgMulti + y * imgMulti * fieldWidth * imgMulti) * 4];
-              for (int cy = 0; cy < imgMulti; cy++)
-              {
-                for (int cx = 0; cx < imgMulti; cx++)
-                {
-                  pix[cx + cy * imgWidth] = f;
-                }
-              }
+              pix[cx + cy * imgWidth] = f;
             }
           }
         }
+      }
 
+      void PresentBitmap()
+      {
         using (var str = imgBitmap.PixelBuffer.AsStream())
         {
-          str.Write(buf, 0, buf.Length);
+          str.Write(imgBitmapBuf, 0, imgBitmapBuf.Length);
         }
+        imgBitmap.Invalidate();
+      }
+
+      void UpdateGame()
+      {
+        PresentBitmap();
+        if (labyGame.FinishReached)
+        {
+          InitGame(level + 1, null);
+        }
+      }
+
+      internal void MoveRight()
+      {
+        if (labyGame.MoveRight(labyPlayer)) UpdateGame();
+      }
+
+      internal void MoveLeft()
+      {
+        if (labyGame.MoveLeft(labyPlayer)) UpdateGame();
+      }
+
+      internal void MoveUp()
+      {
+        if (labyGame.MoveUp(labyPlayer)) UpdateGame();
+      }
+
+      internal void MoveDown()
+      {
+        if (labyGame.MoveDown(labyPlayer)) UpdateGame();
       }
     }
 
-    public readonly Game game = new Game() { level = 1 };
-
-    public void InitGame()
-    {
-      game.InitGame();
-
-    }
+    public readonly Game game = new Game();
 
     /// <summary>
     /// Wird aufgerufen, wenn die Anwendung durch den Endbenutzer normal gestartet wird.  Weitere Einstiegspunkte

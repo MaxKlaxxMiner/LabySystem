@@ -11,9 +11,9 @@
 
   <Grid>
     <Image x:Name="TestBild" HorizontalAlignment="Left" Height="380" VerticalAlignment="Top" Width="380" Source="Assets/Logo.png" Tapped="Image_Tapped"/>
-    <Image x:Name="ButtonLeft" HorizontalAlignment="Left" Height="80" VerticalAlignment="Bottom" Width="80" Source="Assets/Logo.png" Tapped="ButtonLeft_Tapped" Margin="40,0,40,20"/>
-    <Image x:Name="ButtonRight" HorizontalAlignment="Right" Height="80" VerticalAlignment="Bottom" Width="80" Source="Assets/Logo.png" Tapped="ButtonRight_Tapped" Margin="40,0,40,20"/>
-    <Image x:Name="ButtonUp" HorizontalAlignment="Center" Height="80" VerticalAlignment="Bottom" Width="80" Source="Assets/Logo.png" Tapped="ButtonUp_Tapped" Margin="40,0,40,130"/>
-    <Image x:Name="ButtonDown" HorizontalAlignment="Center" Height="80" VerticalAlignment="Bottom" Width="80" Source="Assets/Logo.png" Tapped="ButtonDown_Tapped" Margin="40,0,40,20"/>
+    <Image x:Name="ButtonLeft" HorizontalAlignment="Left" Height="110" VerticalAlignment="Bottom" Width="110" Source="Assets/Logo.png" Tapped="ButtonLeft_Tapped" Margin="10,0,10,10" DoubleTapped="ButtonLeft_DoubleTapped"/>
+    <Image x:Name="ButtonRight" HorizontalAlignment="Right" Height="110" VerticalAlignment="Bottom" Width="110" Source="Assets/Logo.png" Tapped="ButtonRight_Tapped" Margin="10,0,10,10" DoubleTapped="ButtonRight_DoubleTapped"/>
+    <Image x:Name="ButtonUp" HorizontalAlignment="Center" Height="110" VerticalAlignment="Bottom" Width="110" Source="Assets/Logo.png" Tapped="ButtonUp_Tapped" Margin="10,0,10,130" DoubleTapped="ButtonUp_DoubleTapped"/>
+    <Image x:Name="ButtonDown" HorizontalAlignment="Center" Height="110" VerticalAlignment="Bottom" Width="110" Source="Assets/Logo.png" Tapped="ButtonDown_Tapped" Margin="10,0,10,10" DoubleTapped="ButtonDown_DoubleTapped"/>
   </Grid>
 </Page>
