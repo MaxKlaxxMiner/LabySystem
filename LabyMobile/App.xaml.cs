@@ -16,7 +16,9 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using LabySystem;
 
 #endregion
 
@@ -37,6 +39,92 @@ namespace LabyMobile
     {
       InitializeComponent();
       Suspending += OnSuspending;
+    }
+
+    public class Game
+    {
+      public int level;
+      public LabyGame labyGame;
+      public bool labyPlayer;
+      public int fieldWidth;
+      public int fieldHeight;
+      public int[] fieldPixels;
+      public int imgMulti;
+      public int imgWidth;
+      public int imgHeight;
+      public WriteableBitmap imgBitmap;
+
+      public void InitGame()
+      {
+        fieldWidth = LabyGame.GetLevelSize(level).Item1;
+        fieldHeight = LabyGame.GetLevelSize(level).Item2;
+        fieldPixels = new int[fieldWidth * fieldHeight];
+
+        labyGame = new LabyGame(fieldWidth, fieldHeight, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+        labyPlayer = true;
+
+        labyGame.SetFieldChangeEvent((game, type, x, y) =>
+        {
+          switch (type)
+          {
+            case LabyGame.FieldType.wall: fieldPixels[x + y * fieldWidth] = x == 0 || y == 0 || x == fieldWidth - 1 || y == fieldHeight - 1 ? 0x00008b : 0x000000; break;
+            case LabyGame.FieldType.roomVisitedNone: fieldPixels[x + y * fieldWidth] = 0xd3d3d3; break;
+            case LabyGame.FieldType.roomVisitedFirst: fieldPixels[x + y * fieldWidth] = 0xfafad2; break;
+            case LabyGame.FieldType.roomVisitedSecond:
+            case LabyGame.FieldType.roomVisitedMore: fieldPixels[x + y * fieldWidth] = 0xff0000; break;
+            default:
+            {
+              if ((type & LabyGame.FieldType.player) > 0) fieldPixels[x + y * fieldWidth] = 0x008000;
+              if ((type & LabyGame.FieldType.finish) > 0) fieldPixels[x + y * fieldWidth] = 0x8b0000;
+            } break;
+          }
+        });
+        labyGame.UpdateAll();
+
+        imgMulti = 64;
+
+        imgWidth = fieldWidth * imgMulti;
+        imgHeight = fieldHeight * imgMulti;
+        imgBitmap = new WriteableBitmap(imgWidth, imgHeight);
+
+        UpdateBitmap();
+      }
+
+      public unsafe void UpdateBitmap()
+      {
+        byte[] buf = new byte[imgWidth * imgHeight * 4];
+        fixed (byte* _buf = buf)
+        {
+          for (int y = 0; y < fieldHeight; y++)
+          {
+            for (int x = 0; x < fieldWidth; x++)
+            {
+              int f = fieldPixels[x + y * fieldWidth];
+              int* pix = (int*)&_buf[(x * imgMulti + y * imgMulti * fieldWidth * imgMulti) * 4];
+              for (int cy = 0; cy < imgMulti; cy++)
+              {
+                for (int cx = 0; cx < imgMulti; cx++)
+                {
+                  pix[cx + cy * imgWidth] = f;
+                }
+              }
+            }
+          }
+        }
+
+        using (var str = imgBitmap.PixelBuffer.AsStream())
+        {
+          str.Write(buf, 0, buf.Length);
+        }
+      }
+    }
+
+    public readonly Game game = new Game() { level = 1 };
+
+    public void InitGame()
+    {
+      game.InitGame();
+
     }
 
     /// <summary>
@@ -60,6 +148,8 @@ namespace LabyMobile
       // Nur sicherstellen, dass das Fenster aktiv ist.
       if (rootFrame == null)
       {
+
+
         // Einen Rahmen erstellen, der als Navigationskontext fungiert und zum Parameter der ersten Seite navigieren
         rootFrame = new Frame { CacheSize = 1 };
 
@@ -124,6 +214,8 @@ namespace LabyMobile
       var deferral = e.SuspendingOperation.GetDeferral();
 
       // TODO: Anwendungszustand speichern und alle Hintergrundaktivitäten beenden
+
+
       deferral.Complete();
     }
   }
