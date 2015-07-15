@@ -81,7 +81,8 @@ namespace LabyMobile
         });
         labyGame.UpdateAll();
 
-        imgMulti = 64;
+        imgMulti = 1;
+        while ((imgMulti + 1) * fieldWidth < 1024) imgMulti++;
 
         imgWidth = fieldWidth * imgMulti;
         imgHeight = fieldHeight * imgMulti;
