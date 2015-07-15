@@ -53,29 +53,51 @@ namespace LabyMobile
     private void Image_Tapped(object sender, TappedRoutedEventArgs e)
     {
       var app = (App)Application.Current;
-      app.game.InitGame();
-      TestBild.Source = app.game.imgBitmap;
-    }
-
-    private void ButtonUp_Tapped(object sender, TappedRoutedEventArgs e)
-    {
-
+      app.game.InitGame(1, TestBild);
     }
 
     private void ButtonLeft_Tapped(object sender, TappedRoutedEventArgs e)
     {
-
-    }
-
-    private void ButtonDown_Tapped(object sender, TappedRoutedEventArgs e)
-    {
-
+      ((App)Application.Current).game.MoveLeft();
     }
 
     private void ButtonRight_Tapped(object sender, TappedRoutedEventArgs e)
     {
-
+      ((App)Application.Current).game.MoveRight();
     }
+
+    private void ButtonUp_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+      ((App)Application.Current).game.MoveUp();
+    }
+
+    private void ButtonDown_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+      ((App)Application.Current).game.MoveDown();
+    }
+
+    private void ButtonLeft_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+      ((App)Application.Current).game.MoveLeft();
+    }
+
+    private void ButtonRight_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+      ((App)Application.Current).game.MoveRight();
+    }
+
+    private void ButtonUp_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+      ((App)Application.Current).game.MoveUp();
+    }
+
+    private void ButtonDown_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+      ((App)Application.Current).game.MoveDown();
+    }
+
+
+
 
   }
 }
