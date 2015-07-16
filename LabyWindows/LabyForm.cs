@@ -127,7 +127,7 @@ namespace LabyWindows
       //  labyGame.Update(dl.X, dl.Y);
       //}
 
-      const int deadLimit = 100000;
+      const int deadLimit = 1; 
 
       if (labyPlayer)
       {
