@@ -37,7 +37,7 @@ namespace LabyWindows
     const int fieldJumps = 6;
 
     readonly List<Point> marker = new List<Point>();
-    readonly List<Point> deadLines = new List<Point>();
+    readonly HashSet<Point> deadLines = new HashSet<Point>();
     bool zoomOut;
 
     void DrawLaby()
@@ -106,7 +106,8 @@ namespace LabyWindows
         }
       }
 
-      deadLines.AddRange(deadMarker);
+      //deadLines.AddRange(deadMarker);
+      deadLines.UnionWith(deadMarker);
     }
 
     void DeadLineScan(int startX, int startY, int endX, int endY, int deadLimit)
@@ -117,6 +118,9 @@ namespace LabyWindows
       DeadLineScan(startX, startY, startX, startY + 1, endX, endY, deadLimit);
     }
 
+    static int deadLimit = 1;
+    static int mcount = 0;
+
     void DeadLineScanner()
     {
       //      var temp = deadLines.ToArray();
@@ -126,8 +130,6 @@ namespace LabyWindows
       //{
       //  labyGame.Update(dl.X, dl.Y);
       //}
-
-      const int deadLimit = 1; 
 
       if (labyPlayer)
       {
@@ -142,6 +144,8 @@ namespace LabyWindows
       {
         labyGame.Update(dl.X, dl.Y);
       }
+
+      deadLimit = 1;
     }
 
     #region # void InitGame() // Spielfeld initialisieren und zeichnen
@@ -152,7 +156,7 @@ namespace LabyWindows
     {
       if (level > 1)
       {
-        MessageBox.Show("Level: " + level + " (" + LabyGame.GetLevelSize(level).Item1.ToString("#,##0") + " x " + LabyGame.GetLevelSize(level).Item2.ToString("#,##0") + ")", "next Level");
+        MessageBox.Show("Level: " + level + " (" + LabyGame.GetLevelSize(level).Item1.ToString("#,##0") + " x " + LabyGame.GetLevelSize(level).Item2.ToString("#,##0") + " = " + (LabyGame.GetLevelSize(level).Item1 * LabyGame.GetLevelSize(level).Item2).ToString("#,##0") + ")", "next Level");
       }
       if (labyGame != null) labyGame.Dispose();
       labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
@@ -222,7 +226,7 @@ namespace LabyWindows
               labyPicture.SetPixel(x, y, Color.Black);
             }
           } break;
-          case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, deadLines.Any(m => m.X == x && m.Y == y) ? Color.PaleVioletRed : Color.LightGray); break;
+          case LabyGame.FieldType.roomVisitedNone: labyPicture.SetPixel(x, y, deadLines.Contains(new Point(x, y)) ? Color.PaleVioletRed : Color.LightGray); break;
           case LabyGame.FieldType.roomVisitedFirst: labyPicture.SetPixel(x, y, marker.Any(m => m.X == x && m.Y == y) ? Color.Coral : Color.LightGoldenrodYellow); break;
           case LabyGame.FieldType.roomVisitedSecond:
           case LabyGame.FieldType.roomVisitedMore: labyPicture.SetPixel(x, y, marker.Any(m => m.X == x && m.Y == y) ? Color.Coral : Color.Yellow); break;
@@ -245,142 +249,249 @@ namespace LabyWindows
       DrawLaby();
     }
 
+    int lastKeyInsert = 0;
+
     private void LabyForm_KeyDown(object sender, KeyEventArgs e)
     {
-      switch (e.KeyCode)
+      bool first = true;
+      while (first || (e.KeyCode == Keys.Insert && lastKeyInsert + 100 > Environment.TickCount))
       {
-        case Keys.Left:
+        first = false;
+        switch (e.KeyCode)
         {
-          labyGame.MoveLeft(!labyPlayer);
-        } break;
-        case Keys.A:
-        case Keys.NumPad4:
-        {
-          labyGame.MoveLeft(labyPlayer);
-          if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) < offsetX + fieldJumps)
+          case Keys.Left:
           {
-            offsetX = labyPlayer ? labyGame.PlayerX : labyGame.FinishX;
-            offsetX -= fieldWidth / 2;
-            goto case Keys.Control;
-          }
-        } break;
-
-        case Keys.Right:
-        {
-          labyGame.MoveRight(!labyPlayer);
-        } break;
-        case Keys.D:
-        case Keys.NumPad6:
-        {
-          labyGame.MoveRight(labyPlayer);
-          if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) >= offsetX + fieldWidth - fieldJumps)
+            labyGame.MoveLeft(!labyPlayer);
+          } break;
+          case Keys.A:
+          case Keys.NumPad4:
           {
-            offsetX = labyPlayer ? labyGame.PlayerX : labyGame.FinishX;
-            offsetX -= fieldWidth / 2;
-            goto case Keys.Control;
-          }
-        } break;
-
-        case Keys.Up:
-        {
-          labyGame.MoveUp(!labyPlayer);
-        } break;
-        case Keys.W:
-        case Keys.NumPad8:
-        {
-          labyGame.MoveUp(labyPlayer);
-          if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) < offsetY + fieldJumps)
-          {
-            offsetY = labyPlayer ? labyGame.PlayerY : labyGame.FinishY;
-            offsetY -= fieldHeight / 2;
-            goto case Keys.Control;
-          }
-        } break;
-
-        case Keys.Tab: zoomOut = !zoomOut; break;
-
-        case Keys.Down:
-        {
-          labyGame.MoveDown(!labyPlayer);
-        } break;
-        case Keys.S:
-        case Keys.NumPad2:
-        {
-          labyGame.MoveDown(labyPlayer);
-          if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) >= offsetY + fieldHeight - fieldJumps)
-          {
-            offsetY = labyPlayer ? labyGame.PlayerY : labyGame.FinishY;
-            offsetY -= fieldHeight / 2;
-            goto case Keys.Control;
-          }
-        } break;
-
-        case Keys.Space: labyPlayer = !labyPlayer; goto case Keys.Enter;
-
-        case Keys.Back:
-        {
-          marker.Add(labyPlayer ? new Point(labyGame.PlayerX, labyGame.PlayerY) : new Point(labyGame.FinishX, labyGame.FinishY));
-          if (marker.Count > 100) marker.RemoveAt(0);
-        } break;
-
-        case Keys.Add:
-        {
-          zoomLevel = Math.Min(zoomLevel + 1, zoomsWidth.Length - 1);
-          fieldWidth = 1920 / zoomsWidth[zoomLevel];
-          fieldHeight = 1080 / zoomsWidth[zoomLevel];
-          goto case Keys.Enter;
-        }
-
-        case Keys.Subtract:
-        {
-          zoomLevel = Math.Max(zoomLevel - 1, 0);
-          fieldWidth = 1920 / zoomsWidth[zoomLevel];
-          fieldHeight = 1080 / zoomsWidth[zoomLevel];
-          goto case Keys.Enter;
-        }
-
-        case Keys.Enter:
-        {
-          if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
-          {
-            if (labyPlayer)
+            labyGame.MoveLeft(labyPlayer);
+            if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) < offsetX + fieldJumps)
             {
-              offsetX = labyGame.PlayerX;
-              offsetY = labyGame.PlayerY;
+              offsetX = labyPlayer ? labyGame.PlayerX : labyGame.FinishX;
+              offsetX -= fieldWidth / 2;
+              goto case Keys.Control;
             }
-            else
+          } break;
+
+          case Keys.Right:
+          {
+            labyGame.MoveRight(!labyPlayer);
+          } break;
+          case Keys.D:
+          case Keys.NumPad6:
+          {
+            labyGame.MoveRight(labyPlayer);
+            if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) >= offsetX + fieldWidth - fieldJumps)
             {
-              offsetX = labyGame.FinishX;
-              offsetY = labyGame.FinishY;
+              offsetX = labyPlayer ? labyGame.PlayerX : labyGame.FinishX;
+              offsetX -= fieldWidth / 2;
+              goto case Keys.Control;
             }
-            offsetX -= fieldWidth / 2;
-            offsetY -= fieldHeight / 2;
+          } break;
+
+          case Keys.Up:
+          {
+            labyGame.MoveUp(!labyPlayer);
+          } break;
+          case Keys.W:
+          case Keys.NumPad8:
+          {
+            labyGame.MoveUp(labyPlayer);
+            if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) < offsetY + fieldJumps)
+            {
+              offsetY = labyPlayer ? labyGame.PlayerY : labyGame.FinishY;
+              offsetY -= fieldHeight / 2;
+              goto case Keys.Control;
+            }
+          } break;
+
+          case Keys.Tab: zoomOut = !zoomOut; break;
+
+          case Keys.Down:
+          {
+            labyGame.MoveDown(!labyPlayer);
+          } break;
+          case Keys.S:
+          case Keys.NumPad2:
+          {
+            labyGame.MoveDown(labyPlayer);
+            if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) >= offsetY + fieldHeight - fieldJumps)
+            {
+              offsetY = labyPlayer ? labyGame.PlayerY : labyGame.FinishY;
+              offsetY -= fieldHeight / 2;
+              goto case Keys.Control;
+            }
+          } break;
+
+          case Keys.Delete: deadLimit = 20000000; break;
+
+          case Keys.Insert:
+          {
+            mcount++;
+            deadLimit = 2000;
+            if (mcount % 10 == 0)
+            {
+              deadLimit = 20000;
+              if (mcount % 100 == 0)
+              {
+                deadLimit = 200000;
+                if (mcount % 1000 == 0)
+                {
+                  deadLimit = 2000000;
+                  if (mcount >= 10000)
+                  {
+                    deadLimit = 20000000;
+                    mcount = 0;
+                  }
+                }
+              }
+            }
+
+            int cx = 0;
+            int cy = 0;
+            int lim = 0;
+            while (lim < 100)
+            {
+              if (labyPlayer)
+              {
+                cx = labyGame.PlayerX;
+                cy = labyGame.PlayerY;
+              }
+              else
+              {
+                cx = labyGame.FinishX;
+                cy = labyGame.FinishY;
+              }
+
+              if (
+                (labyGame.GetField(cx - 1, cy) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx - 1, cy).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx + 1, cy) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx + 1, cy).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy - 1) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx, cy - 1).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy + 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy + 1).ToArgb() != Color.PaleVioletRed.ToArgb())
+                )
+              { labyGame.MoveDown(labyPlayer); lim++; continue; }
+
+              if (
+                (labyGame.GetField(cx - 1, cy) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx - 1, cy).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx + 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx + 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy - 1) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx, cy - 1).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy + 1) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx, cy + 1).ToArgb() == Color.PaleVioletRed.ToArgb())
+                )
+              { labyGame.MoveRight(labyPlayer); lim++; continue; }
+
+              if (
+                (labyGame.GetField(cx - 1, cy) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx - 1, cy).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx + 1, cy) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx + 1, cy).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy - 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy - 1).ToArgb() != Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy + 1) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx, cy + 1).ToArgb() == Color.PaleVioletRed.ToArgb())
+                )
+              { labyGame.MoveUp(labyPlayer); lim++; continue; }
+
+              if (
+                (labyGame.GetField(cx - 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx - 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx + 1, cy) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx + 1, cy).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy - 1) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx, cy - 1).ToArgb() == Color.PaleVioletRed.ToArgb()) &&
+                (labyGame.GetField(cx, cy + 1) != LabyGame.FieldType.roomVisitedNone || labyPicture.GetPixel(cx, cy + 1).ToArgb() == Color.PaleVioletRed.ToArgb())
+                )
+              { labyGame.MoveLeft(labyPlayer); lim++; continue; }
+
+              break;
+            }
+
+            if (lim == 0)
+            {
+              deadLimit = 100;
+
+              if (labyGame.GetField(cx, cy + 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy + 1).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveDown(labyPlayer); break; }
+              if (labyGame.GetField(cx + 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx + 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveRight(labyPlayer); break; }
+              if (labyGame.GetField(cx, cy - 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy - 1).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveUp(labyPlayer); break; }
+              if (labyGame.GetField(cx - 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx - 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveLeft(labyPlayer); break; }
+
+              if (labyGame.GetField(cx, cy + 1) == LabyGame.FieldType.roomVisitedFirst && labyPicture.GetPixel(cx, cy + 1).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveDown(labyPlayer); break; }
+              if (labyGame.GetField(cx + 1, cy) == LabyGame.FieldType.roomVisitedFirst && labyPicture.GetPixel(cx + 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveRight(labyPlayer); break; }
+              if (labyGame.GetField(cx, cy - 1) == LabyGame.FieldType.roomVisitedFirst && labyPicture.GetPixel(cx, cy - 1).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveUp(labyPlayer); break; }
+              if (labyGame.GetField(cx - 1, cy) == LabyGame.FieldType.roomVisitedFirst && labyPicture.GetPixel(cx - 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveLeft(labyPlayer); break; }
+            }
+
+            if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) < offsetX + fieldJumps) goto case Keys.Enter;
+            if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) >= offsetX + fieldWidth - fieldJumps) goto case Keys.Enter;
+            if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) < offsetY + fieldJumps) goto case Keys.Enter;
+            if ((labyPlayer ? labyGame.PlayerY : labyGame.FinishY) >= offsetY + fieldHeight - fieldJumps) goto case Keys.Enter;
+          } break;
+
+          case Keys.Space: labyPlayer = !labyPlayer; goto case Keys.Enter;
+
+          case Keys.Back:
+          {
+            marker.Add(labyPlayer ? new Point(labyGame.PlayerX, labyGame.PlayerY) : new Point(labyGame.FinishX, labyGame.FinishY));
+            if (marker.Count > 100) marker.RemoveAt(0);
+          } break;
+
+          case Keys.Add:
+          {
+            zoomLevel = Math.Min(zoomLevel + 1, zoomsWidth.Length - 1);
+            fieldWidth = 1920 / zoomsWidth[zoomLevel];
+            fieldHeight = 1080 / zoomsWidth[zoomLevel];
+            goto case Keys.Enter;
           }
-          goto case Keys.Control;
+
+          case Keys.Subtract:
+          {
+            zoomLevel = Math.Max(zoomLevel - 1, 0);
+            fieldWidth = 1920 / zoomsWidth[zoomLevel];
+            fieldHeight = 1080 / zoomsWidth[zoomLevel];
+            goto case Keys.Enter;
+          }
+
+          case Keys.Enter:
+          {
+            if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
+            {
+              if (labyPlayer)
+              {
+                offsetX = labyGame.PlayerX;
+                offsetY = labyGame.PlayerY;
+              }
+              else
+              {
+                offsetX = labyGame.FinishX;
+                offsetY = labyGame.FinishY;
+              }
+              offsetX -= fieldWidth / 2;
+              offsetY -= fieldHeight / 2;
+            }
+            goto case Keys.Control;
+          }
+
+          case Keys.Control:
+          {
+            if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
+            {
+              if (offsetX < 0) offsetX = 0;
+              if (offsetY < 0) offsetY = 0;
+              if (offsetX > labyPicture.Width - fieldWidth) offsetX = labyPicture.Width - fieldWidth;
+              if (offsetY > labyPicture.Height - fieldHeight) offsetY = labyPicture.Height - fieldHeight;
+            }
+          } break;
+
+          case Keys.Escape: Close(); break;
         }
 
-        case Keys.Control:
+        if (labyGame.FinishReached)
         {
-          if (labyPicture.Width > fieldWidth && labyPicture.Height > fieldHeight)
-          {
-            if (offsetX < 0) offsetX = 0;
-            if (offsetY < 0) offsetY = 0;
-            if (offsetX > labyPicture.Width - fieldWidth) offsetX = labyPicture.Width - fieldWidth;
-            if (offsetY > labyPicture.Height - fieldHeight) offsetY = labyPicture.Height - fieldHeight;
-          }
-        } break;
+          DrawLaby();
+          level++;
+          InitGame();
+        }
 
-        case Keys.Escape: Close(); break;
+        DeadLineScanner();
+
       }
-
-      if (labyGame.FinishReached)
-      {
-        level++;
-        InitGame();
-      }
-
-      DeadLineScanner();
       DrawLaby();
+
+      if (e.KeyCode == Keys.Insert) lastKeyInsert = Environment.TickCount;
     }
   }
 }
