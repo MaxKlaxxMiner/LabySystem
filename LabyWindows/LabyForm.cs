@@ -21,6 +21,9 @@ namespace LabyWindows
       InitializeComponent();
     }
 
+    const int bre = 1920;
+    const int hei = 1080;
+
     Bitmap gamePicture = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
     Graphics gameGraphics;
     int level = 1;
@@ -58,7 +61,7 @@ namespace LabyWindows
         gameGraphics.FillRectangle(new SolidBrush(Color.Gray), 0, 0, gamePicture.Width, gamePicture.Height);
         int drawMul = 1;
 
-        while (labyPicture.Width * (drawMul + 1) < 1920 && labyPicture.Height * (drawMul + 1) < 1080) drawMul++;
+        while (labyPicture.Width * (drawMul + 1) < bre && labyPicture.Height * (drawMul + 1) < hei) drawMul++;
 
         if (drawMul > 1)
         {
@@ -74,6 +77,14 @@ namespace LabyWindows
         gameGraphics.DrawImage(labyPicture, new Rectangle(0, 0, gamePicture.Width, gamePicture.Height), -0.5f + offsetX, -0.5f + offsetY, fieldWidth, fieldHeight, GraphicsUnit.Pixel);
       }
 
+      if (nextDeleteTimer > 0)
+      {
+        string txt = ((Environment.TickCount - nextDeleteTimer + 30000) / 30000.0).ToString("N1");
+        var f = new Font("Consolas", 14f);
+        var rect = gameGraphics.MeasureString(txt, f);
+        gameGraphics.FillRectangle(new SolidBrush(Color.White), 0, 0, rect.Width, rect.Height);
+        gameGraphics.DrawString(txt, f, new SolidBrush(Color.Black), 0f, 0f);
+      }
       gamePictureBox1.Refresh();
     }
     void DeadLineScan(int startX, int startY, int posX, int posY, int endX, int endY, int deadLimit)
@@ -159,15 +170,15 @@ namespace LabyWindows
         MessageBox.Show("Level: " + level + " (" + LabyGame.GetLevelSize(level).Item1.ToString("#,##0") + " x " + LabyGame.GetLevelSize(level).Item2.ToString("#,##0") + " = " + (LabyGame.GetLevelSize(level).Item1 * LabyGame.GetLevelSize(level).Item2).ToString("#,##0") + ")", "next Level");
       }
       if (labyGame != null) labyGame.Dispose();
-      labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+      labyGame = new LabyGame(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 12345678 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
       labyPlayer = true;
       labyPicture = new Bitmap(labyGame.Width, labyGame.Height, PixelFormat.Format32bppRgb);
       offsetX = 0;
       offsetY = 0;
       marker.Clear();
       deadLines.Clear();
-      fieldWidth = 1920 / zoomsWidth[zoomLevel];
-      fieldHeight = 1080 / zoomsWidth[zoomLevel];
+      fieldWidth = bre / zoomsWidth[zoomLevel];
+      fieldHeight = hei / zoomsWidth[zoomLevel];
 
       #region # // --- Spielfeld zeichnen ---
       int labyLine = labyPicture.Width;
@@ -249,7 +260,8 @@ namespace LabyWindows
       DrawLaby();
     }
 
-    int lastKeyInsert = 0;
+    int lastKeyInsert;
+    int nextDeleteTimer = Environment.TickCount + 1000;
 
     private void LabyForm_KeyDown(object sender, KeyEventArgs e)
     {
@@ -325,7 +337,17 @@ namespace LabyWindows
             }
           } break;
 
-          case Keys.Delete: deadLimit = 20000000; break;
+          case Keys.Delete:
+          {
+            int next = nextDeleteTimer - Environment.TickCount;
+            if (next > 0)
+            {
+              MessageBox.Show("Wait: " + (next / 1000.0).ToString("N1") + " s");
+              break;
+            }
+            deadLimit = 20000000;
+            nextDeleteTimer += 30000;
+          } break;
 
           case Keys.Insert:
           {
@@ -337,15 +359,6 @@ namespace LabyWindows
               if (mcount % 100 == 0)
               {
                 deadLimit = 200000;
-                if (mcount % 1000 == 0)
-                {
-                  deadLimit = 2000000;
-                  if (mcount >= 10000)
-                  {
-                    deadLimit = 20000000;
-                    mcount = 0;
-                  }
-                }
               }
             }
 
@@ -432,16 +445,16 @@ namespace LabyWindows
           case Keys.Add:
           {
             zoomLevel = Math.Min(zoomLevel + 1, zoomsWidth.Length - 1);
-            fieldWidth = 1920 / zoomsWidth[zoomLevel];
-            fieldHeight = 1080 / zoomsWidth[zoomLevel];
+            fieldWidth = bre / zoomsWidth[zoomLevel];
+            fieldHeight = hei / zoomsWidth[zoomLevel];
             goto case Keys.Enter;
           }
 
           case Keys.Subtract:
           {
             zoomLevel = Math.Max(zoomLevel - 1, 0);
-            fieldWidth = 1920 / zoomsWidth[zoomLevel];
-            fieldHeight = 1080 / zoomsWidth[zoomLevel];
+            fieldWidth = bre / zoomsWidth[zoomLevel];
+            fieldHeight = hei / zoomsWidth[zoomLevel];
             goto case Keys.Enter;
           }
 
@@ -492,6 +505,10 @@ namespace LabyWindows
       DrawLaby();
 
       if (e.KeyCode == Keys.Insert) lastKeyInsert = Environment.TickCount;
+    }
+
+    private void timer1_Tick(object sender, EventArgs e)
+    {
     }
   }
 }
