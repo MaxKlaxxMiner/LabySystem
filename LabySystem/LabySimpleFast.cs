@@ -112,66 +112,33 @@ namespace LabySystem
     /// <param name="wallNumber">die zu befüllende Wandnummer</param>
     void FieldNumberFill(int pos, int wallNumber)
     {
-      if (field[pos].WallNumber != wallNumber)
+      var listPos1 = new int[15];
+      int listPos1Count = 0;
+      var listPos2 = new int[15];
+      int listPos2Count = 0;
+      listPos1[listPos1Count++] = pos;
+
+      while (listPos1Count > 0)
       {
-        field[pos].WallNumber = wallNumber;
-        if (field[pos].WallLeft && field[pos - 1].WallNumber != wallNumber) FillLeft(pos - 1, wallNumber);
-        if (field[pos + 1].WallLeft && field[pos + 1].WallNumber != wallNumber) FillRight(pos + 1, wallNumber);
-        if (field[pos].WallTop && field[pos - fieldWidth].WallNumber != wallNumber) FillTop(pos - fieldWidth, wallNumber);
-        if (field[pos + fieldWidth].WallTop && field[pos + fieldWidth].WallNumber != wallNumber) FillBottom(pos + fieldWidth, wallNumber);
+        for (int i = 0; i < listPos1Count; i++)
+        {
+          int p = listPos1[i];
+          if (field[p].WallNumber == wallNumber) continue;
+          field[p].WallNumber = wallNumber;
+          if (field[p].WallLeft && field[p - 1].WallNumber != wallNumber) listPos2[listPos2Count++] = p - 1;
+          if (field[p + 1].WallLeft && field[p + 1].WallNumber != wallNumber) listPos2[listPos2Count++] = p + 1;
+          if (field[p].WallTop && field[p - fieldWidth].WallNumber != wallNumber) listPos2[listPos2Count++] = p - fieldWidth;
+          if (field[p + fieldWidth].WallTop && field[p + fieldWidth].WallNumber != wallNumber) listPos2[listPos2Count++] = p + fieldWidth;
+          if (listPos2Count + 4 > listPos2.Length) Array.Resize(ref listPos2, listPos2.Length * 2);
+        }
+
+        listPos1Count = listPos2Count;
+        listPos2Count = 0;
+
+        var tmp = listPos1;
+        listPos1 = listPos2;
+        listPos2 = tmp;
       }
-    }
-
-    /// <summary>
-    /// Füllmodus links gerichtet
-    /// </summary>
-    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
-    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
-    void FillLeft(int pos, int wallNumber)
-    {
-      field[pos].WallNumber = wallNumber;
-      if (field[pos].WallLeft) FillLeft(pos - 1, wallNumber);
-      if (field[pos].WallTop) FillTop(pos - fieldWidth, wallNumber);
-      if (field[pos + fieldWidth].WallTop) FillBottom(pos + fieldWidth, wallNumber);
-    }
-
-    /// <summary>
-    /// Füllmodus rechts gerichtet
-    /// </summary>
-    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
-    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
-    void FillRight(int pos, int wallNumber)
-    {
-      field[pos].WallNumber = wallNumber;
-      if (field[pos + 1].WallLeft) FillRight(pos + 1, wallNumber);
-      if (field[pos].WallTop) FillTop(pos - fieldWidth, wallNumber);
-      if (field[pos + fieldWidth].WallTop) FillBottom(pos + fieldWidth, wallNumber);
-    }
-
-    /// <summary>
-    /// Füllmodus oben gerichtet
-    /// </summary>
-    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
-    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
-    void FillTop(int pos, int wallNumber)
-    {
-      field[pos].WallNumber = wallNumber;
-      if (field[pos].WallLeft) FillLeft(pos - 1, wallNumber);
-      if (field[pos + 1].WallLeft) FillRight(pos + 1, wallNumber);
-      if (field[pos].WallTop) FillTop(pos - fieldWidth, wallNumber);
-    }
-
-    /// <summary>
-    /// Füllmodus unten gerichtet
-    /// </summary>
-    /// <param name="pos">Position der Wand, welche gefüllt werden soll</param>
-    /// <param name="wallNumber">die zu befüllende Wandnummer</param>
-    void FillBottom(int pos, int wallNumber)
-    {
-      field[pos].WallNumber = wallNumber;
-      if (field[pos].WallLeft) FillLeft(pos - 1, wallNumber);
-      if (field[pos + 1].WallLeft) FillRight(pos + 1, wallNumber);
-      if (field[pos + fieldWidth].WallTop) FillBottom(pos + fieldWidth, wallNumber);
     }
     #endregion
     #endregion
