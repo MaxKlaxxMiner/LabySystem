@@ -130,7 +130,7 @@ namespace LabyWindows
     }
 
     static int deadLimit = 1;
-    static int mcount = 0;
+    static int deadMuli = 3;
 
     void DeadLineScanner()
     {
@@ -351,16 +351,7 @@ namespace LabyWindows
 
           case Keys.Insert:
           {
-            mcount++;
-            deadLimit = 2000;
-            if (mcount % 10 == 0)
-            {
-              deadLimit = 20000;
-              if (mcount % 100 == 0)
-              {
-                deadLimit = 200000;
-              }
-            }
+            deadLimit = 100;
 
             int cx = 0;
             int cy = 0;
@@ -415,7 +406,20 @@ namespace LabyWindows
 
             if (lim == 0)
             {
+              if (deadMuli < 1500 &&
+                  (
+                    (labyGame.GetField(cx, cy + 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy + 1).ToArgb() != Color.PaleVioletRed.ToArgb()) ||
+                    (labyGame.GetField(cx + 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx + 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) ||
+                    (labyGame.GetField(cx, cy - 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy - 1).ToArgb() != Color.PaleVioletRed.ToArgb()) ||
+                    (labyGame.GetField(cx - 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx - 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb())
+                  ))
+              {
+                deadLimit *= deadMuli;
+                deadMuli *= 7;
+                break;
+              }
               deadLimit = 100;
+              deadMuli = 3;
 
               if (labyGame.GetField(cx, cy + 1) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx, cy + 1).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveDown(labyPlayer); break; }
               if (labyGame.GetField(cx + 1, cy) == LabyGame.FieldType.roomVisitedNone && labyPicture.GetPixel(cx + 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveRight(labyPlayer); break; }
@@ -427,6 +431,7 @@ namespace LabyWindows
               if (labyGame.GetField(cx, cy - 1) == LabyGame.FieldType.roomVisitedFirst && labyPicture.GetPixel(cx, cy - 1).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveUp(labyPlayer); break; }
               if (labyGame.GetField(cx - 1, cy) == LabyGame.FieldType.roomVisitedFirst && labyPicture.GetPixel(cx - 1, cy).ToArgb() != Color.PaleVioletRed.ToArgb()) { labyGame.MoveLeft(labyPlayer); break; }
             }
+            deadMuli = 3;
 
             if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) < offsetX + fieldJumps) goto case Keys.Enter;
             if ((labyPlayer ? labyGame.PlayerX : labyGame.FinishX) >= offsetX + fieldWidth - fieldJumps) goto case Keys.Enter;
