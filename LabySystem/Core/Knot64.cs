@@ -81,7 +81,7 @@ namespace LabySystem.Core
     /// <returns>lesbare Zeichenkette</returns>
     public override string ToString()
     {
-      return "[" + WallNumber + "] Top: " + WallTop + ", Left: " + WallLeft;
+      return val + ": [" + WallNumber + "] Top: " + WallTop + ", Left: " + WallLeft;
     }
 
     /// <summary>

@@ -91,7 +91,8 @@ namespace LabyConsole
         Console.BackgroundColor = ConsoleColor.Black;
         Console.WriteLine("generate level {0} ({1} x {2})...", level, LabyGame.GetLevelSize(level).Item1.ToString("#,##0"), LabyGame.GetLevelSize(level).Item2.ToString("#,##0"));
 
-        ILaby laby = new LabySimpleFast(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 1234567 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+        //ILaby laby = new LabySimpleFast(LabyGame.GetLevelSize(level).Item1, LabyGame.GetLevelSize(level).Item2, level * 12345678 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
+        ILaby laby = new LabySimpleFast(33, 33, level * 32345678 * (DateTime.Now.Day + DateTime.Now.Year * 365 + DateTime.Now.Month * 372));
         LabyGame game = new LabyGame(laby);
 
         long rest = 0;

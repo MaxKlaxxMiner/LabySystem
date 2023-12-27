@@ -21,8 +21,8 @@ namespace LabyWindows
       InitializeComponent();
     }
 
-    const int bre = 1920;
-    const int hei = 1080;
+    int bre;
+    int hei;
 
     Bitmap gamePicture = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
     Graphics gameGraphics;
@@ -165,6 +165,11 @@ namespace LabyWindows
     /// </summary>
     void InitGame()
     {
+      if (bre == 0)
+      {
+        bre = Size.Width;
+        hei = Size.Height;
+      }
       if (level > 1)
       {
         MessageBox.Show("Level: " + level + " (" + LabyGame.GetLevelSize(level).Item1.ToString("#,##0") + " x " + LabyGame.GetLevelSize(level).Item2.ToString("#,##0") + " = " + (LabyGame.GetLevelSize(level).Item1 * LabyGame.GetLevelSize(level).Item2).ToString("#,##0") + ")", "next Level");
